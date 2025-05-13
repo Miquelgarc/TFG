@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "types": ["vite/client"],
+    "baseUrl": "./resources",
+    "paths": {
+      "@/*": ["js/*"]
+    }
+  },
+  "include": ["resources/**/*"]
+}

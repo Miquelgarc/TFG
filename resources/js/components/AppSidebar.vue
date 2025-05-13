@@ -1,0 +1,95 @@
+<script setup lang="ts">
+import NavFooter from '@/components/NavFooter.vue';
+import NavMain from '@/components/NavMain.vue';
+import NavUser from '@/components/NavUser.vue';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import { type NavItem } from '@/types';
+import { Link, usePage } from '@inertiajs/vue3';
+import { BookOpen, ChartColumnBig, ClipboardList, Cog, Folder, LayoutDashboard, Users } from 'lucide-vue-next';
+import AppLogo from './AppLogo.vue';
+import { computed } from 'vue';
+import type { MyPageProps } from '@/types';
+
+const user = computed(() => usePage<MyPageProps>().props.auth.user);
+const role = computed(() => user.value?.role_name);
+
+const mainNavItems = computed<NavItem[]>(() => {
+    const items: NavItem[] = [
+
+        {
+            title: 'COMISIONS',
+            href: '/afiliats/comisions',
+            icon: ChartColumnBig,
+        }
+        , {
+            title: 'CONFIGURACIÓ',
+            href: '/settings',
+            icon: Cog,
+        }
+
+
+    ];
+
+    if (role.value === 'admin') {
+        items.unshift({
+            title: 'AFILIATS',
+            href: '/afiliats',
+            icon: Users,
+        });
+    }
+    if (role.value === 'affiliate') {
+        items.unshift({
+            title: 'LINKS AFILIAT',
+            href: '/links-afiliat',
+            icon: ClipboardList,
+        });
+        items.unshift({
+            title: 'INFO AFILIAT',
+            href: '/info-afiliat',
+            icon: LayoutDashboard,
+        });
+    }
+
+    return items;
+});
+
+
+const footerNavItems: NavItem[] = [
+    {
+        title: 'Github Repo',
+        href: 'https://github.com/laravel/vue-starter-kit',
+        icon: Folder,
+    },
+    {
+        title: 'Documentation',
+        href: 'https://laravel.com/docs/starter-kits#vue',
+        icon: BookOpen,
+    },
+];
+</script>
+
+<template>
+    <Sidebar collapsible="icon" variant="inset">
+        <SidebarHeader>
+            <SidebarMenu>
+                <SidebarMenuItem>
+                    <SidebarMenuButton size="lg" as-child>
+                        <Link :href="route('dashboard')">
+                        <AppLogo />
+                        </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+            </SidebarMenu>
+        </SidebarHeader>
+
+        <SidebarContent>
+            <NavMain :items="mainNavItems" />
+        </SidebarContent>
+
+        <SidebarFooter>
+            <NavFooter :items="footerNavItems" />
+            <NavUser />
+        </SidebarFooter>
+    </Sidebar>
+    <slot />
+</template>
