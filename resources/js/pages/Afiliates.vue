@@ -28,6 +28,14 @@ const dropdownRefs = reactive<{ [key: number]: HTMLElement | null }>({});
 const toggleDropdown = (id: number) => {
     dropdownVisible.value = dropdownVisible.value === id ? null : id
 }
+
+function setDropdownRef(id: number) {
+    return (el: HTMLElement | null) => {
+        dropdownRefs[id] = el;
+    };
+}
+
+
 const changeStatus = async (id: number, status: string) => {
     try {
         await axios.post(`/afiliats/${id}/cambiar-estat`, { status });
@@ -178,8 +186,8 @@ function changePage(pageNum: number) {
                                     {{ afiliat.status }}
                                 </span>
                                 <transition name="fade-scale">
-                                    <div v-if="dropdownVisible === afiliat.id"
-                                        :ref="el => dropdownRefs[afiliat.id] = el as HTMLElement"
+                                    <div v-show="dropdownVisible === afiliat.id"
+                                        :ref="el => dropdownRefs[afiliat.id] = el" @click="toggleDropdown(afiliat.id)"
                                         class="absolute z-10 mt-1 w-36 bg-white border border-gray-200 rounded-lg shadow-xl text-sm text-gray-800">
                                         <ul class="divide-y divide-gray-100">
                                             <li v-for="option in ['active', 'pending', 'rejected']" :key="option"
