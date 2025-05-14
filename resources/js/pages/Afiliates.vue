@@ -58,9 +58,11 @@ const changeStatus = async (id: number, status: string) => {
     }
 };
 const handleClickOutside = (event: MouseEvent) => {
+    const dropdownEl = dropdownRef.value as HTMLElement | null;
     if (
-        dropdownRef.value &&
-        !dropdownRef.value.contains(event.target as Node)
+        dropdownEl &&
+        typeof dropdownEl.contains === 'function' &&
+        !dropdownEl.contains(event.target as Node)
     ) {
         dropdownVisibleId.value = null;
     }
