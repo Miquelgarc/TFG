@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label';
 import AuthBase from '@/layouts/AuthLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
 
 defineProps<{
     status?: string;
@@ -18,17 +20,32 @@ const form = useForm({
     email: '',
     password: '',
     remember: false,
+    captcha: '',
 });
+
+const captchaQuestion = ref('');
+
+const fetchCaptcha = async () => {
+    const response = await axios.get('/captcha');
+    captchaQuestion.value = response.data.question;
+};
+
+onMounted(fetchCaptcha);
+
 
 const submit = () => {
     form.post(route('login'), {
-        onFinish: () => form.reset('password'),
+        onFinish: () => {
+            form.reset('password', 'captcha');
+            fetchCaptcha();
+        },
     });
 };
 </script>
 
 <template>
     <AuthBase title="Inicia sessió" description="Ompleu el formulari per iniciar sessió">
+
         <Head title="Log in" />
 
         <div v-if="status" class="mb-4 text-center text-sm font-medium text-green-600">
@@ -39,36 +56,29 @@ const submit = () => {
             <div class="grid gap-6">
                 <div class="grid gap-2">
                     <Label for="email">Email</Label>
-                    <Input
-                        id="email"
-                        type="email"
-                        required
-                        autofocus
-                        :tabindex="1"
-                        autocomplete="email"
-                        v-model="form.email"
-                        placeholder="email@exemple.com"
-                    />
+                    <Input id="email" type="email" required autofocus :tabindex="1" autocomplete="email"
+                        v-model="form.email" placeholder="email@exemple.com" />
                     <InputError :message="form.errors.email" />
                 </div>
 
                 <div class="grid gap-2">
                     <div class="flex items-center justify-between">
                         <Label for="password">Contrassenya</Label>
-                        <TextLink v-if="canResetPassword" :href="route('password.request')" class="text-sm" :tabindex="5">
+                        <TextLink v-if="canResetPassword" :href="route('password.request')" class="text-sm"
+                            :tabindex="5">
                             No recordes la contrassenya?
                         </TextLink>
                     </div>
-                    <Input
-                        id="password"
-                        type="password"
-                        required
-                        :tabindex="2"
-                        autocomplete="current-password"
-                        v-model="form.password"
-                        placeholder="Contrassenya"
-                    />
+                    <Input id="password" type="password" required :tabindex="2" autocomplete="current-password"
+                        v-model="form.password" placeholder="Contrassenya" />
                     <InputError :message="form.errors.password" />
+                </div>
+                
+                <div class="grid gap-2">
+                    <Label for="captcha">Resol el captcha: {{ captchaQuestion }}</Label>
+                    <Input id="captcha" type="text" required :tabindex="6" v-model="form.captcha"
+                        placeholder="Resposta" />
+                    <InputError :message="form.errors.captcha" />
                 </div>
 
                 <div class="flex items-center justify-between">

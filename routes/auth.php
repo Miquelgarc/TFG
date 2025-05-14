@@ -10,6 +10,8 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
@@ -59,4 +61,15 @@ Route::middleware('auth')->group(function () {
         ->name('InfoAfiliat');
     Route::get('Afiliats', fn() => route('Afiliats'))
         ->name('Afiliats');
+});
+
+Route::get('/captcha', function () {
+    $a = rand(1, 9);
+    $b = rand(1, 9);
+    $question = "$a + $b";
+    Session::put('captcha_answer', $a + $b);
+
+    return response()->json([
+        'question' => $question,
+    ]);
 });

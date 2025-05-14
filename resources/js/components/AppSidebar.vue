@@ -57,12 +57,12 @@ const mainNavItems = computed<NavItem[]>(() => {
 const footerNavItems: NavItem[] = [
     {
         title: 'Github Repo',
-        href: 'https://github.com/laravel/vue-starter-kit',
+        href: 'https://github.com/Miquelgarc/TFG',
         icon: Folder,
     },
     {
         title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
+        href: 'https://docs.google.com/document/d/12TDuZGa8HpOofdo7Ke2HgM39qQ0rzigxD7-j07BLu7g/edit?tab=t.0#heading=h.t04qy2hhnb3t',
         icon: BookOpen,
     },
 ];

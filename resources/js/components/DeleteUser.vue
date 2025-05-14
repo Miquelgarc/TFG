@@ -44,23 +44,22 @@ const closeModal = () => {
 
 <template>
     <div class="space-y-6">
-        <HeadingSmall title="Delete account" description="Delete your account and all of its resources" />
+        <HeadingSmall title="Eliminar compte" description="Elimina el teu compte i tots els serveis" />
         <div class="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10">
             <div class="relative space-y-0.5 text-red-600 dark:text-red-100">
-                <p class="font-medium">Warning</p>
-                <p class="text-sm">Please proceed with caution, this cannot be undone.</p>
+                <p class="font-medium">Alerta!!</p>
+                <p class="text-sm">Si us plau, procediu amb precaució, això no es pot desfer.</p>
             </div>
             <Dialog>
                 <DialogTrigger as-child>
-                    <Button variant="destructive">Delete account</Button>
+                    <Button variant="destructive">Eliminar Compte</Button>
                 </DialogTrigger>
                 <DialogContent>
                     <form class="space-y-6" @submit="deleteUser">
                         <DialogHeader class="space-y-3">
-                            <DialogTitle>Are you sure you want to delete your account?</DialogTitle>
+                            <DialogTitle>Segur que vols eliminar aquest compte?</DialogTitle>
                             <DialogDescription>
-                                Once your account is deleted, all of its resources and data will also be permanently deleted. Please enter your
-                                password to confirm you would like to permanently delete your account.
+                                Una vegada eliminada, totes les teves dades d'usuari seran eliminades, si hi ha comissions per cobrar se't faran arribar. Per favor, introdueix la contrasenya per confirmar que t'agradaria eliminar permanentment el teu compte.
                             </DialogDescription>
                         </DialogHeader>
 

@@ -2,12 +2,19 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { onMounted, onBeforeUnmount, ref, watch, reactive } from 'vue';
-import type { AfiliadoPagination, MyPageProps } from '@/types';
+import type { AfiliadoPagination, MyPageProps, BreadcrumbItem } from '@/types';
 import Swal from 'sweetalert2';
 import type { SweetAlertResult } from 'sweetalert2';
 import axios from 'axios';
 import { toast } from 'vue3-toastify';
 import { deepClone } from '@/utils/utils.js';
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Afiliats',
+        href: '/afiliats',
+    },
+];
 
 const page = usePage<MyPageProps>();
 
@@ -21,18 +28,12 @@ const filters = reactive({
 
 
 // Cambiar estado
-const dropdownVisible = ref<number | null>(null)
-const dropdownRefs = reactive<{ [key: number]: HTMLElement | null }>({});
+const dropdownVisibleId = ref<number | null>(null)
+const dropdownRef = ref<HTMLElement | null>(null);
 
 
 const toggleDropdown = (id: number) => {
-    dropdownVisible.value = dropdownVisible.value === id ? null : id
-}
-
-function setDropdownRef(id: number) {
-    return (el: HTMLElement | null) => {
-        dropdownRefs[id] = el;
-    };
+    dropdownVisibleId.value = dropdownVisibleId.value === id ? null : id
 }
 
 
@@ -41,7 +42,7 @@ const changeStatus = async (id: number, status: string) => {
         await axios.post(`/afiliats/${id}/cambiar-estat`, { status });
         const afiliat = afiliates.data.find(a => a.id === id)
         if (afiliat) afiliat.status = status
-        dropdownVisible.value = null
+        dropdownVisibleId.value = null
         toast.success('Estado actualizado correctamente');
         router.get(route('afiliats'), {
             search: filters.search,
@@ -57,13 +58,13 @@ const changeStatus = async (id: number, status: string) => {
     }
 };
 const handleClickOutside = (event: MouseEvent) => {
-    const clickedInsideAny = Object.values(dropdownRefs).some(el => {
-        return el && el.contains(event.target as Node);
-    });
-
-    if (!clickedInsideAny) {
-        dropdownVisible.value = null;
+    if (
+        dropdownRef.value &&
+        !dropdownRef.value.contains(event.target as Node)
+    ) {
+        dropdownVisibleId.value = null;
     }
+
 };
 
 onMounted(() => {
@@ -134,13 +135,13 @@ function changePage(pageNum: number) {
 
 <template>
 
-    <Head title="Afiliados" />
+    <Head title="Afiliats" />
 
-    <AppLayout>
+    <AppLayout :breadcrumbs="breadcrumbs">
         <div class="p-6 space-y-6">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                 <div class="flex gap-2 w-full md:w-auto">
-                    <input v-model="filters.search" type="text" placeholder="Buscar afiliado..."
+                    <input v-model="filters.search" type="text" placeholder="Cercar Afiliat..."
                         class="w-full md:w-64 px-4 py-2 rounded-lg border border-gray-300 focus:ring focus:ring-blue-200" />
 
                     <select v-model="filters.status"
@@ -186,8 +187,7 @@ function changePage(pageNum: number) {
                                     {{ afiliat.status }}
                                 </span>
                                 <transition name="fade-scale">
-                                    <div v-show="dropdownVisible === afiliat.id"
-                                        :ref="el => dropdownRefs[afiliat.id] = el" @click="toggleDropdown(afiliat.id)"
+                                    <div v-if="dropdownVisibleId === afiliat.id" ref="dropdownRef"
                                         class="absolute z-10 mt-1 w-36 bg-white border border-gray-200 rounded-lg shadow-xl text-sm text-gray-800">
                                         <ul class="divide-y divide-gray-100">
                                             <li v-for="option in ['active', 'pending', 'rejected']" :key="option"

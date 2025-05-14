@@ -29,6 +29,14 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
+        $request->validate([
+            'captcha' => 'required|numeric',
+        ]);
+
+        if ((int) $request->captcha !== (int) session('captcha_answer')) {
+            return back()->withErrors(['captcha' => 'Captcha incorrecte. Torna-ho a intentar.']);
+        }
+
         $request->authenticate();
 
         $request->session()->regenerate();

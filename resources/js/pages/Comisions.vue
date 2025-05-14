@@ -42,17 +42,16 @@ watch(filters, () => {
 
         <div class="p-4">
             <div class="mb-4 flex gap-4 items-center">
-                <input v-model="filters.search" placeholder="Buscar descripción..." class="input" />
+                <input v-model="filters.search" placeholder="Cercar..." class="input" />
                 <input v-model="filters.date" type="date" class="input" />
             </div>
 
             <table class="table-auto w-full border">
                 <thead>
-                    <tr class="bg-gray-200">
-                        <th class="px-4 py-2 text-left">Descripción</th>
-                        <th class="px-4 py-2 text-left">Monto</th>
-                        <th class="px-4 py-2 text-left">Fecha</th>
-                        <th class="px-4 py-2 text-left">Afiliado</th>
+                    <tr class="bg-blue-500">
+                        <th class="px-4 py-2 text-left">Descripció</th>
+                        <th class="px-4 py-2 text-left">Quantitat</th>
+                        <th class="px-4 py-2 text-left">Data</th>
                     </tr>
                 </thead>
                 <tbody>
