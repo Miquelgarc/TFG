@@ -22,7 +22,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/afiliats/{user}', [UserController::class, 'destroy']);
 
     Route::get('/afiliats/comisions', [UserController::class, 'Comisions'])->name('comisions');
-
+    Route::get('/afiliats/links', [UserController::class, 'Links'])->name('links');
 });
 
 

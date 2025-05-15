@@ -40,7 +40,7 @@ const mainNavItems = computed<NavItem[]>(() => {
     if (role.value === 'affiliate') {
         items.unshift({
             title: 'LINKS AFILIAT',
-            href: '/links-afiliat',
+            href: '/afiliats/links',
             icon: ClipboardList,
         });
         items.unshift({

@@ -76,19 +76,19 @@ const submit = () => {
                 
                 <div class="grid gap-2">
                     <Label for="captcha">Resol el captcha: {{ captchaQuestion }}</Label>
-                    <Input id="captcha" type="text" required :tabindex="6" v-model="form.captcha"
+                    <Input id="captcha" type="text" required :tabindex="3" v-model="form.captcha"
                         placeholder="Resposta" />
                     <InputError :message="form.errors.captcha" />
                 </div>
 
                 <div class="flex items-center justify-between">
                     <Label for="remember" class="flex items-center space-x-3">
-                        <Checkbox id="remember" v-model="form.remember" :tabindex="3" />
+                        <Checkbox id="remember" v-model="form.remember" :tabindex="4" />
                         <span>Recorda el meu usuari</span>
                     </Label>
                 </div>
 
-                <Button type="submit" class="mt-4 w-full" :tabindex="4" :disabled="form.processing">
+                <Button type="submit" class="mt-4 w-full" :tabindex="5" :disabled="form.processing">
                     <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
                     Iniciar sessió
                 </Button>
@@ -96,7 +96,7 @@ const submit = () => {
 
             <div class="text-center text-sm text-muted-foreground">
                 No tens un compte d'afiliat?&nbsp;
-                <TextLink :href="route('register')" :tabindex="5">Crear compte</TextLink>
+                <TextLink :href="route('register')" :tabindex="6">Crear compte</TextLink>
             </div>
         </form>
     </AuthBase>

@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Comisions;
+use App\Models\Link;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+
 
 class UserController extends Controller
 {
@@ -100,6 +102,42 @@ class UserController extends Controller
 
         return Inertia::render('Comisions', [
             'comisions' => $comisions,
+            'filters' => [
+                'search' => $request->search,
+                'date' => $request->date,
+            ],
+            'user' => $user,
+        ]);
+    }
+
+    public function Links(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            abort(403, 'No tienes permiso para ver esta página.');
+        }
+
+        $query = Link::query();
+
+        if ($user->role_name === 'afiliat') {
+            $query->where('id', $user->id);
+        }
+
+        // Filtro por búsqueda en descripción
+        if ($search = $request->input('search')) {
+            $query->where('link', 'like', "%{$search}%");
+        }
+
+        // Filtro por fecha (opcional)
+        if ($date = $request->input('date')) {
+            $query->whereDate('created_at', $date);
+        }
+
+        $links = $query->with('user')->orderByDesc('created_at')->paginate(10)->withQueryString();
+
+        return Inertia::render('Links', [
+            'links' => $links,
             'filters' => [
                 'search' => $request->search,
                 'date' => $request->date,

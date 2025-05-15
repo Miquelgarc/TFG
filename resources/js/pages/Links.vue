@@ -7,8 +7,8 @@ import { deepClone } from '@/utils/utils.js';
 
 
 const page = usePage<MyPageProps>();
-const comisions = page.props.comisions;
-const filteredComisions = ref(deepClone(comisions?.data ?? []));
+const links = page.props.links;
+const filteredlinks = ref(deepClone(links?.data ?? []));
 const loading = ref(false);
 /* const user = page.props.user;
  */
@@ -18,7 +18,7 @@ const filters = reactive({
 });
 
 function changePage(pageNum: number) {
-    router.get(route('comisions'), {
+    router.get(route('links'), {
         search: filters.search,
         date: filters.generated_at,
         page: pageNum
@@ -31,7 +31,7 @@ function changePage(pageNum: number) {
 watch(filters, (newFilters) => {
     loading.value = true; // <- START shimmer
 
-        filteredComisions.value = (comisions?.data ?? []).filter((comision: any) => {
+        filteredlinks.value = (links?.data ?? []).filter((comision: any) => {
             const matchesSearch =
                 !newFilters.search ||
                 comision.description.toLowerCase().includes(newFilters.search.toLowerCase()) ||
@@ -82,13 +82,16 @@ function resetFilters() {
                         <thead class="bg-blue-600 text-white dark:bg-blue-700">
                             <tr>
                                 <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
-                                    Descripció
+                                    URL pare
                                 </th>
                                 <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
-                                    Quantitat
+                                    URL generada
                                 </th>
                                 <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
-                                    Data
+                                    Clicks
+                                </th>
+                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
+                                    Conversions
                                 </th>
                             </tr>
                         </thead>
@@ -113,16 +116,19 @@ function resetFilters() {
 
                             <!-- Si no: datos normales -->
                             <template v-else>
-                                <tr v-for="c in filteredComisions" :key="c.id"
+                                <tr v-for="link in filteredlinks" :key="link.id"
                                     class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
                                     <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
-                                        {{ c.description }}
+                                        {{ link.target_url }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
+                                        {{ link.generated_url }}
                                     </td>
                                     <td class="px-6 py-4 text-green-600 dark:text-green-400">
-                                        €{{ Number(c.amount).toFixed(2) }}
+                                        {{ link.clicks }}
                                     </td>
                                     <td class="px-6 py-4 text-gray-600 dark:text-gray-300">
-                                        {{ new Date(c.generated_at).toLocaleDateString() }}
+                                        {{ link.conversions }}
                                     </td>
                                 </tr>
                             </template>
@@ -134,9 +140,9 @@ function resetFilters() {
 
             <!-- Paginación -->
             <div class="mt-6 flex flex-wrap justify-center gap-2">
-                <button v-for="pageNum in comisions?.last_page" :key="pageNum" @click="changePage(pageNum)" :class="[
+                <button v-for="pageNum in links?.last_page" :key="pageNum" @click="changePage(pageNum)" :class="[
                     'px-4 py-2 rounded-md transition-all duration-200 border',
-                    pageNum === comisions?.current_page
+                    pageNum === links?.current_page
                         ? 'bg-blue-600 text-white border-blue-700'
                         : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
                 ]">
