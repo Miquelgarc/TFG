@@ -71,6 +71,47 @@ return new class extends Migration {
             $table->timestamps();
         });
 
+        Schema::create('rental_properties', function (Blueprint $table) {
+            $table->id();
+            $table->string('title');
+            $table->text('description')->nullable();
+            $table->string('location');
+            $table->decimal('price_per_night', 8, 2);
+            $table->unsignedInteger('max_guests')->default(1);
+            $table->string('image_url')->nullable();
+            $table->boolean('is_available')->default(true);
+            $table->timestamps();
+        });
+
+        Schema::create('property_links', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('property_id')->constrained('rental_properties')->onDelete('cascade');
+            $table->foreignId('affiliate_link_id')->constrained('affiliate_links')->onDelete('cascade');
+            $table->timestamps();
+        });
+
+        Schema::create('reservations', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('property_id')->constrained('rental_properties')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // Llogater
+            $table->foreignId('affiliate_link_id')->nullable()->constrained('affiliate_links')->onDelete('set null'); // si ve d'un afiliat
+            $table->date('check_in_date');
+            $table->date('check_out_date');
+            $table->decimal('total_price', 10, 2);
+            $table->enum('status', ['pending', 'confirmed', 'cancelled'])->default('pending');
+            $table->timestamps();
+        });
+
+        Schema::create('affiliate_clicks', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('affiliate_link_id')->constrained()->onDelete('cascade');
+            $table->ipAddress('ip_address');
+            $table->string('user_agent')->nullable();
+            $table->string('referrer')->nullable();
+            $table->timestamps();
+        });
+
+
         /* // (Opcional) Taula de sol·licituds d'afiliació
         Schema::create('affiliate_requests', function (Blueprint $table) {
             $table->id();

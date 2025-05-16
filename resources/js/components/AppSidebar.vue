@@ -5,7 +5,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
-import { BookOpen, ChartColumnBig, ClipboardList, Cog, Folder, LayoutDashboard, Users } from 'lucide-vue-next';
+import { BookOpen, ChartColumnBig, ClipboardList, Cog, Folder, House, LayoutDashboard, Users } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 import { computed } from 'vue';
 import type { MyPageProps } from '@/types';
@@ -47,6 +47,11 @@ const mainNavItems = computed<NavItem[]>(() => {
             title: 'INFO AFILIAT',
             href: '/info-afiliat',
             icon: LayoutDashboard,
+        });
+        items.push({
+            title: 'RESERVES',
+            href: '/reserva',
+            icon: House,
         });
     }
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
-import { ref, reactive, watch } from 'vue';
+import { ref, reactive} from 'vue';
 import type { MyPageProps } from '@/types';
 import { deepClone } from '@/utils/utils.js';
 
@@ -28,7 +28,17 @@ function changePage(pageNum: number) {
     });
 }
 
-watch(filters, (newFilters) => {
+function updateComisions() {
+    router.get(route('comisions'), {
+        search: filters.search,
+        date: filters.generated_at,
+    }, {
+        preserveState: false,
+        replace: true,
+    });
+}
+
+/* watch(filters, (newFilters) => {
     loading.value = true; // <- START shimmer
 
         filteredComisions.value = (comisions?.data ?? []).filter((comision: any) => {
@@ -47,11 +57,24 @@ watch(filters, (newFilters) => {
 
         loading.value = false; // <- STOP shimmer
     ; 
-}, { deep: true });
+}, { deep: true }); */
+
+/* watch(() => page.props.comisions, (newComs) => {
+  filteredComisions.value = deepClone(newComs?.data ?? []);
+}, { immediate: true }); */
+
 
 function resetFilters() {
     filters.search = '';
     filters.generated_at = '';
+    router.get(route('comisions'), {
+        search: '',
+        date: '',
+    }, {
+        preserveState: true,
+        replace: true
+    });
+    updateComisions();
 }
 
 </script>
@@ -64,9 +87,9 @@ function resetFilters() {
         <div class="p-4 sm:p-6 bg-white dark:bg-[#0A0A0A] transition-colors duration-300">
             <!-- Filtros -->
             <div class="mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
-                <input v-model="filters.search" placeholder="Buscar..."
+                <input v-model="filters.search" @input="updateComisions" placeholder="Buscar..."
                     class="input w-full sm:w-1/3 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200" />
-                <input v-model="filters.generated_at" type="date"
+                <input v-model="filters.generated_at" @change="updateComisions" type="date"
                     class="input px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200" />
                 <button @click="resetFilters"
                     class="btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors duration-200">

@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\AfiliatController;
+use App\Http\Controllers\ReservesController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AffiliateLinkController;
+
 use Database\Seeders\UsersTableSeeder;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -21,9 +24,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/afiliats/{user}/editar', [UserController::class, 'edit']);
     Route::delete('/afiliats/{user}', [UserController::class, 'destroy']);
 
-    Route::get('/afiliats/comisions', [UserController::class, 'Comisions'])->name('comisions');
+    Route::get('/afiliats/comisions', [UserController::class, 'Comisions'])->name(name: 'comisions');
+
     Route::get('/afiliats/links', [UserController::class, 'Links'])->name('links');
+    Route::get('/reserva', [ReservesController::class, 'indexProperties'])->name('reserva');
+
+    Route::post('/reserva', [ReservesController::class, 'store'])->name('reserva.store');
+
 });
+
+
+Route::get('/link/{code}', [AffiliateLinkController::class, 'redirect'])->name('affiliate.redirect');
 
 
 require __DIR__ . '/settings.php';

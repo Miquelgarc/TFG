@@ -12,7 +12,7 @@ class CommissionsTableSeeder extends Seeder
         $affiliate1 = DB::table('users')->where('email', 'affiliate1@example.com')->first();
         $affiliate2 = DB::table('users')->where('email', 'affiliate2@example.com')->first();
         DB::table('commissions')->insert([
-            /* [
+            [
                 'affiliate_id' => $affiliate1->id,
                 'amount' => 25.50,
                 'description' => 'Commission for Product A',
@@ -27,7 +27,7 @@ class CommissionsTableSeeder extends Seeder
                 'generated_at' => now()->subDay(),
                 'created_at' => now(),
                 'updated_at' => now(),
-            ], */
+            ], 
             [
                 'affiliate_id' => $affiliate1->id,
                 'amount' => 30.00,

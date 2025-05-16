@@ -98,7 +98,7 @@ class UserController extends Controller
             $query->whereDate('generated_at', $date);
         }
 
-        $comisions = $query->with('afiliat')->orderByDesc('generated_at')->paginate(10)->withQueryString();
+        $comisions = $query->with('afiliat')->orderByDesc('generated_at')->paginate(12)->withQueryString();
 
         return Inertia::render('Comisions', [
             'comisions' => $comisions,
@@ -145,5 +145,7 @@ class UserController extends Controller
             'user' => $user,
         ]);
     }
+
+    
 }
 
