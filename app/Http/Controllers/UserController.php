@@ -84,29 +84,38 @@ class UserController extends Controller
 
         $query = Comisions::query();
 
-        if ($user->role_name === 'afiliat') {
-            $query->where('afiliat_id', $user->id);
+        if ($user->role_name === 'affiliate') {
+            $query->where('affiliate_id', $user->id);
         }
+
+        $query->join('users', 'commissions.affiliate_id', '=', 'users.id')
+            ->select('commissions.*', 'users.name as affiliate_name');
+
 
         // Filtro por búsqueda en descripción
         if ($search = $request->input('search')) {
-            $query->where('description', 'like', "%{$search}%");
+            $query->where('description', 'like', "%{$search}%", )
+                ->orWhere('users.name', 'like', "%{$search}%");
         }
 
         // Filtro por fecha (opcional)
         if ($date = $request->input('date')) {
-            $query->whereDate('generated_at', $date);
+            $query->whereDate('commissions.created_at', $date);
         }
 
-        $comisions = $query->with('afiliat')->orderByDesc('generated_at')->paginate(12)->withQueryString();
+        $comisions = $query->with('afiliat')->orderByDesc('created_at')->paginate(12)->withQueryString();
 
         return Inertia::render('Comisions', [
             'comisions' => $comisions,
             'filters' => [
                 'search' => $request->search,
                 'date' => $request->date,
+                'page' => $request->page ?? 1,
             ],
-            'user' => $user,
+            'pagination' => [
+                'current_page' => $comisions->currentPage(),
+                'last_page' => $comisions->lastPage(),
+            ],
         ]);
     }
 
@@ -120,32 +129,36 @@ class UserController extends Controller
 
         $query = Link::query();
 
-        if ($user->role_name === 'afiliat') {
-            $query->where('id', $user->id);
+        if ($user->role_name === 'affiliate') {
+            $query->where('affiliate_id', $user->id);
         }
 
-        // Filtro por búsqueda en descripción
-        if ($search = $request->input('search')) {
-            $query->where('link', 'like', "%{$search}%");
+        $query->join('users', 'affiliate_links.affiliate_id', '=', 'users.id')
+            ->select('affiliate_links.*', 'users.name as affiliate_name');
+
+        if ($request->search) {
+            $query->where('description', 'like', "%{$request->search}%")
+                ->orWhere('users.name', 'like', "%{$request->search}%");
         }
 
-        // Filtro por fecha (opcional)
-        if ($date = $request->input('date')) {
-            $query->whereDate('created_at', $date);
+        if ($request->date) {
+            $query->whereDate('affiliate_links.created_at', $request->date);
         }
 
-        $links = $query->with('user')->orderByDesc('created_at')->paginate(10)->withQueryString();
+
+        if (in_array($request->order_by, ['clicks', 'conversions'])) {
+            $query->orderBy($request->order_by, $request->order_dir === 'asc' ? 'asc' : 'desc');
+        }
+
+
+
+        $links = $query->paginate(10)->appends($request->all());
 
         return Inertia::render('Links', [
             'links' => $links,
-            'filters' => [
-                'search' => $request->search,
-                'date' => $request->date,
-            ],
-            'user' => $user,
+            'filtersLink' => $request->only(['search', 'date', 'order_by', 'order_dir', 'page']),
         ]);
-    }
 
-    
+    }
 }
 

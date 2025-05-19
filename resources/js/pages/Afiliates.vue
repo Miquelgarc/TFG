@@ -52,6 +52,7 @@ const changeStatus = async (id: number, status: string) => {
             replace: true,
         });
 
+
     } catch (error) {
         toast.error('Error al cambiar el estado');
         console.error(error);
@@ -140,96 +141,99 @@ function changePage(pageNum: number) {
     <Head title="Afiliats" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="p-6 space-y-6">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                <div class="flex gap-2 w-full md:w-auto">
-                    <input v-model="filters.search" type="text" placeholder="Cercar Afiliat..."
-                        class="w-full md:w-64 px-4 py-2 rounded-lg border border-gray-300 focus:ring focus:ring-blue-200" />
+        <div class="p-4 sm:p-6 bg-white dark:bg-[#0A0A0A] transition-colors duration-300">
+            <div class="mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
 
-                    <select v-model="filters.status"
-                        class="px-3 py-2 rounded-lg border bg-background border-gray-300 focus:ring focus:ring-gray-200">
-                        <option value="">Todos</option>
-                        <option value="active">Activo</option>
-                        <option value="pending">Pendiente</option>
-                        <option value="rejected">Inactivo</option>
-                    </select>
-                </div>
+                <input v-model="filters.search" type="text" placeholder="Cercar Afiliat..."
+                    class="input w-full sm:w-1/3 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200" />
+
+                <select v-model="filters.status"
+                    class="input px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200">
+                    <option value="">Tots</option>
+                    <option value="active">Actiu</option>
+                    <option value="pending">Pendent</option>
+                    <option value="rejected">Inactiu</option>
+                </select>
+
             </div>
 
-            <div class="bg-white rounded-xl shadow-md p-4 overflow-x-auto">
-                <table class="min-w-full text-left text-sm">
-                    <thead class="text-gray-600 border-b">
-                        <tr>
-                            <th class="px-4 py-2">Nombre</th>
-                            <th class="px-4 py-2">Email</th>
-                            <th class="px-4 py-2">Empresa</th>
-                            <th class="px-4 py-2">Website</th>
-                            <th class="px-4 py-2">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="afiliat in filteredList" :key="afiliat.id" class="hover:bg-gray-100 transition">
-                            <td class="px-4 py-2 text-black">{{ afiliat.name }}</td>
-                            <td class="px-4 py-2 text-black">{{ afiliat.email }}</td>
-                            <td class="px-4 py-2 text-black">{{ afiliat.company_name }}</td>
-                            <td class="px-4 py-2">
-                                <a :href="afiliat.website_url" class="text-blue-600 hover:underline" target="_blank"
-                                    rel="noopener">
-                                    {{ afiliat.website_url }}
-                                </a>
-                            </td>
-                            <td class="px-4 py-2 w-32">
-                                <span @click="toggleDropdown(afiliat.id)"
-                                    class="cursor-pointer relative inline-block uppercase tracking-wide px-2 py-1 text-xs font-semibold rounded-full"
-                                    :class="{
-                                        'bg-green-100 text-green-800': afiliat.status === 'active',
-                                        'bg-gray-200 text-gray-700': afiliat.status === 'pending',
-                                        'bg-red-100 text-red-800': afiliat.status === 'rejected',
-                                    }">
-                                    {{ afiliat.status }}
-                                </span>
-                                <transition name="fade-scale">
-                                    <div v-if="dropdownVisibleId === afiliat.id" ref="dropdownRef"
-                                        class="absolute z-10 mt-1 w-36 bg-white border border-gray-200 rounded-lg shadow-xl text-sm text-gray-800">
-                                        <ul class="divide-y divide-gray-100">
-                                            <li v-for="option in ['active', 'pending', 'rejected']" :key="option"
-                                                @click="changeStatus(afiliat.id, option)"
-                                                class="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
-                                                :class="{
-                                                    'font-semibold text-green-600': option === 'active',
-                                                    'font-semibold text-gray-500': option === 'pending',
-                                                    'font-semibold text-red-500': option === 'rejected'
-                                                }">
-                                                <span>{{ option }}</span>
-                                                <span v-if="afiliat.status === option"
-                                                    class="text-xs text-gray-400">✓</span>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </transition>
+            <div class="overflow-x-auto rounded-lg shadow-lg transition-shadow duration-300">
+                <div class="transition-all duration-300">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-blue-600 text-white dark:bg-blue-700">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Nom</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Email</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Empresa</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Website</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Estat</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Accions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="afiliat in filteredList" :key="afiliat.id" class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                                <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ afiliat.name }}</td>
+                                <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ afiliat.email }}</td>
+                                <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ afiliat.company_name }}</td>
+                                <td class="px-6 py-4 text-gray-900 dark:text-gray-100">
+                                    <a :href="afiliat.website_url" class="text-blue-300 hover:underline" target="_blank"
+                                        rel="noopener">
+                                        {{ afiliat.website_url }}
+                                    </a>
+                                </td>
+                                <td class="px-6 py-4 text-gray-900 dark:text-gray-100">
+                                    <span @click="toggleDropdown(afiliat.id)"
+                                        class="cursor-pointer relative inline-block uppercase tracking-wide px-2 py-1 text-xs font-semibold rounded-full"
+                                        :class="{
+                                            'bg-green-100 text-green-800': afiliat.status === 'active',
+                                            'bg-gray-200 text-gray-700': afiliat.status === 'pending',
+                                            'bg-red-100 text-red-800': afiliat.status === 'rejected',
+                                        }">
+                                        {{ afiliat.status }}
+                                    </span>
+                                    <transition name="fade-scale">
+                                        <div v-if="dropdownVisibleId === afiliat.id" ref="dropdownRef"
+                                            class="absolute z-10 mt-1 w-36 bg-white border border-gray-200 rounded-lg shadow-xl text-sm text-gray-800">
+                                            <ul class="divide-y divide-gray-100">
+                                                <li v-for="option in ['active', 'pending', 'rejected']" :key="option"
+                                                    @click="changeStatus(afiliat.id, option)"
+                                                    class="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
+                                                    :class="{
+                                                        'font-semibold text-green-600': option === 'active',
+                                                        'font-semibold text-gray-500': option === 'pending',
+                                                        'font-semibold text-red-500': option === 'rejected'
+                                                    }">
+                                                    <span>{{ option }}</span>
+                                                    <span v-if="afiliat.status === option"
+                                                        class="text-xs text-gray-400">✓</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </transition>
 
-                            </td>
+                                </td>
 
-                            <td class="px-4 py-2 flex gap-2">
-                                <button @click="editAfiliat(afiliat)"
-                                    class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded">
-                                    Editar
-                                </button>
-                                <button @click="deleteAfiliat(afiliat)"
-                                    class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
-                                    Eliminar
-                                </button>
-                            </td>
-                        </tr>
+                                <td class="px-4 py-2 flex gap-2">
+                                    <button @click="editAfiliat(afiliat)"
+                                        class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded">
+                                        Editar
+                                    </button>
+                                    <button @click="deleteAfiliat(afiliat)"
+                                        class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
+                                        Eliminar
+                                    </button>
+                                </td>
+                            </tr>
 
-                        <tr v-if="afiliates.data.length === 0">
-                            <td colspan="6" class="text-center px-4 py-6 text-gray-500">
-                                No se encontraron afiliados.
-                            </td>
-                        </tr>
-                    </tbody>
+                            <tr v-if="afiliates.data.length === 0">
+                                <td colspan="6" class="text-center px-4 py-6 text-gray-500">
+                                    No se encontraron afiliados.
+                                </td>
+                            </tr>
+                        </tbody>
 
-                </table>
+                    </table>
+                </div>
             </div>
 
             <div class="flex justify-center pt-4">

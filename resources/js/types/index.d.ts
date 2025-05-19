@@ -43,6 +43,7 @@ export interface MyPageProps extends PageProps {
     filters?: Filters;
     filtersCommission?: FiltersCommission;
     links?: Pagination<Links>;
+    filtersLinks?: FiltersLinks;
     comisions?: Pagination<Commission>;
     afiliates?: Pagination<Afiliado>;
     auth: {
@@ -73,13 +74,13 @@ interface Commission {
     amount: number;
     description: string;
     generated_at: string;
-    
 }
 interface Links {
     target_url: string;
     generated_url: string;
     clicks: string;
     conversions: string;
+    created_at: string;
 }
 
 interface Filters {
@@ -89,6 +90,14 @@ interface Filters {
 interface FiltersCommission {
     search?: string;
     generated_at?: string;
+    page?: number;
+}
+interface FiltersLinks {
+    search?: string;
+    created_at?: string;
+    order_by?: string;
+    order_dir?: string;
+    page?: number;
 }
 interface Pagination<T> {
     data: T[];

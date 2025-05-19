@@ -8,7 +8,7 @@ class Comisions extends Model
 {
     protected $table = 'commissions';
     protected $fillable = [
-        'afiliat_id',
+        'affiliate_id',
         'amount',
         'description',
         'generated_at',

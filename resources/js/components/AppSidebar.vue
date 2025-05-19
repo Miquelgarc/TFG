@@ -22,11 +22,15 @@ const mainNavItems = computed<NavItem[]>(() => {
             icon: ChartColumnBig,
         }
         , {
+            title: 'LINKS',
+            href: '/afiliats/links',
+            icon: ClipboardList,
+        },
+        {
             title: 'CONFIGURACIÓ',
             href: '/settings',
             icon: Cog,
-        }
-
+        },
 
     ];
 
@@ -37,12 +41,8 @@ const mainNavItems = computed<NavItem[]>(() => {
             icon: Users,
         });
     }
+
     if (role.value === 'affiliate') {
-        items.unshift({
-            title: 'LINKS AFILIAT',
-            href: '/afiliats/links',
-            icon: ClipboardList,
-        });
         items.unshift({
             title: 'INFO AFILIAT',
             href: '/info-afiliat',
