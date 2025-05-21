@@ -106,7 +106,7 @@ function resetFilters() {
                             <template v-if="filteredComisions.length">
                                 <tr v-for="c in filteredComisions" :key="c.id"
                                     class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
-                                    <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
+                                    <td v-if="isAdmin" class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
                                         {{ c.affiliate_name }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">

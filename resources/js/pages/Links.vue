@@ -10,6 +10,8 @@ import dayjs from 'dayjs';
 const page = usePage<MyPageProps>();
 const links = page.props.links;
 const filteredLinks = ref(deepClone(links?.data ?? []));
+const isAdmin = page.props.auth.user?.role_name === 'admin';
+
 const loading = ref(false);
 
 const filters = reactive({
@@ -99,7 +101,7 @@ function resetFilters() {
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-blue-600 text-white dark:bg-blue-700">
                             <tr>
-                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Nom Afiliat
+                                <th v-if="isAdmin" class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Nom Afiliat
                                 </th>
                                 <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">URL pare
                                 </th>
@@ -117,7 +119,7 @@ function resetFilters() {
                             <template v-if="filteredLinks.length">
                                 <tr v-for="link in filteredLinks" :key="link.id"
                                     class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
-                                    <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ link.affiliate_name }}</td>
+                                    <td v-if="isAdmin" class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ link.affiliate_name }}</td>
                                     <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ link.target_url }}</td>
                                     <td class="px-6 py-4 text-blue-600 dark:text-blue-400 break-all">{{
                                         link.generated_url }}</td>

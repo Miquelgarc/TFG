@@ -4,6 +4,7 @@ use App\Http\Controllers\AfiliatController;
 use App\Http\Controllers\ReservesController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AffiliateLinkController;
+use App\Http\Controllers\HouseController;
 
 use Database\Seeders\UsersTableSeeder;
 use Illuminate\Support\Facades\Route;
@@ -27,9 +28,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/afiliats/comisions', [UserController::class, 'Comisions'])->name(name: 'comisions');
 
     Route::get('/afiliats/links', [UserController::class, 'Links'])->name('links');
-    Route::get('/reserva', [ReservesController::class, 'indexProperties'])->name('reserva');
 
-    Route::post('/reserva', [ReservesController::class, 'store'])->name('reserva.store');
+    Route::get('/houses', [HouseController::class, 'indexProperties'])->name('houses');
+    
+    Route::get('/reserva', [ReservesController::class, 'indexProperties'])->name('reservations.index');
+
+    Route::post('/reserva', [ReservesController::class, 'store'])->name('reservations.store');
 
 });
 

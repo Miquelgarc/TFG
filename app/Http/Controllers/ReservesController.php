@@ -13,28 +13,41 @@ use App\Models\Link;
 
 class ReservesController extends Controller
 {
-     public function store(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
-            'house_id' => 'required|exists:houses,id',
-            'start_date' => 'required|date|after:yesterday',
-            'end_date' => 'required|date|after:start_date',
+            'property_id' => 'required|exists:rental_properties,id',
+            'check_in_date' => 'required|date|after:yesterday',
+            'check_out_date' => 'required|date|after:start_date',
         ]);
 
-        $house = Property::findOrFail($request->house_id);
+        $house = Property::findOrFail($request->property_id);
 
-        $nits = now()->parse($request->start_date)->diffInDays($request->end_date);
+        $nits = \Carbon\Carbon::parse($request->check_in_date)->diffInDays($request->check_out_date);
         $total = $nits * $house->price_per_night;
+
+        if ($request->affiliate_link_id) {
+            $link = Link::where('generated_url', $request->url)->firstOrFail();
+            $comision = Comisions::where('affiliate_id', $link->affiliate_id)->first();
+            if ($comision) {
+                $total += $comision->amount;
+            }
+        }
 
         $reservation = Reservation::create([
             'user_id' => Auth::id(),
-            'house_id' => $house->id,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
+            'property_id' => $house->id,
+            'affiliate_link_id' => $link->id ?? null,
+            'check_in_date' => $request->check_in_date,
+            'check_out_date' => $request->check_out_date,
             'total_price' => $total,
+            'status' => 'pending',
         ]);
 
-        return response()->json($reservation);
+        return redirect()->route('reservations.index', [
+            'message' => 'Reservation created successfully',
+            'reservation' => $reservation,
+        ]);
     }
     public function Reserva()
     {
@@ -44,7 +57,8 @@ class ReservesController extends Controller
         ]);
     }
 
-    public function indexProperties() {
+    public function indexProperties()
+    {
         $properties = Property::all();
 
         return Inertia::render('Reserva', [

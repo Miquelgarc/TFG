@@ -87,15 +87,19 @@ class UserController extends Controller
         if ($user->role_name === 'affiliate') {
             $query->where('affiliate_id', $user->id);
         }
+        if ($user->role_name === 'admin') {
+            $query->join('users', 'commissions.affiliate_id', '=', 'users.id')
+                ->select('commissions.*', 'users.name as affiliate_name');
+        }
 
-        $query->join('users', 'commissions.affiliate_id', '=', 'users.id')
-            ->select('commissions.*', 'users.name as affiliate_name');
 
 
         // Filtro por búsqueda en descripción
         if ($search = $request->input('search')) {
-            $query->where('description', 'like', "%{$search}%", )
-                ->orWhere('users.name', 'like', "%{$search}%");
+            $query->where('description', 'like', "%{$search}%", );
+            if ($user->role_name === 'admin') {
+                $query->orWhere('users.name', 'like', "%{$search}%");
+            }
         }
 
         // Filtro por fecha (opcional)

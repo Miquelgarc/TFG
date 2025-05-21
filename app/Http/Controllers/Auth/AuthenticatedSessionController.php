@@ -38,10 +38,15 @@ class AuthenticatedSessionController extends Controller
         }
 
         $request->authenticate();
-
+        if (in_array($request->user()->status, ['rejected', 'pending'])) {
+            Auth::guard('web')->logout();
+            return redirect('/status-account');
+        }
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return ($request->user()->is_admin)
+            ? redirect()->intended('/afiliats')
+            : redirect()->intended('/info-afiliat');
     }
 
     /**

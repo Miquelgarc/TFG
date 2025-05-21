@@ -48,7 +48,7 @@ const changeStatus = async (id: number, status: string) => {
             search: filters.search,
             status: filters.status,
         }, {
-            preserveState: true,
+            preserveState: false,
             replace: true,
         });
 
