@@ -98,6 +98,9 @@ interface FiltersLinks {
     order_by?: string;
     order_dir?: string;
     page?: number;
+    date_from?: string;
+    date_to?: string;
+    affiliate_id?: number;
 }
 interface Pagination<T> {
     data: T[];

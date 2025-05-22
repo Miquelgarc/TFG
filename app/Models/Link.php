@@ -25,4 +25,8 @@ class Link extends Model
     {
         return url($value);
     }
+
+    public function affiliate() {
+        return $this->belongsTo(User::class, 'affiliate_id');
+    }
 }

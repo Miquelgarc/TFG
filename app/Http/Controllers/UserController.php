@@ -8,6 +8,8 @@ use App\Models\Link;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use App\Exports\LinksExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 
 class UserController extends Controller
@@ -104,10 +106,10 @@ class UserController extends Controller
 
         // Filtro por fecha (opcional)
         if ($date = $request->input('date')) {
-            $query->whereDate('commissions.created_at', $date);
+            $query->whereDate('commissions.generated_at', $date);
         }
 
-        $comisions = $query->with('afiliat')->orderByDesc('created_at')->paginate(12)->withQueryString();
+        $comisions = $query->with('afiliat')->orderByDesc('generated_at')->paginate(12)->withQueryString();
 
         return Inertia::render('Comisions', [
             'comisions' => $comisions,
@@ -164,5 +166,48 @@ class UserController extends Controller
         ]);
 
     }
+    public function export(Request $request)
+    {
+        $query = Link::query()->with('affiliate');
+
+        if ($request->search) {
+            $query->where('generated_url', 'like', "%{$request->search}%");
+        }
+
+        if ($request->date_from) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->date_to) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        if ($request->affiliate_id) {
+            $query->where('affiliate_id', $request->affiliate_id);
+        }
+
+        $links = $query->get();
+
+        if ($request->export === 'csv') {
+            return response()->streamDownload(function () use ($links) {
+                $handle = fopen('php://output', 'w');
+                fputcsv($handle, ['Afiliado', 'URL Padre', 'URL Generada', 'Clicks', 'Conversiones', 'Fecha']);
+                foreach ($links as $link) {
+                    fputcsv($handle, [
+                        $link->affiliate->name ?? '',
+                        $link->target_url,
+                        $link->generated_url,
+                        $link->clicks,
+                        $link->conversions,
+                        $link->created_at->format('d/m/Y'),
+                    ]);
+                }
+                fclose($handle);
+            }, 'links.csv');
+        }
+
+        abort(400, 'Formato no válido');
+    }
+
 }
 

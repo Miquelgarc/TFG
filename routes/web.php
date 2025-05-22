@@ -29,7 +29,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/afiliats/links', [UserController::class, 'Links'])->name('links');
 
+    Route::get('/afiliats/links/export', [UserController::class, 'export'])->name('links.export');
+
     Route::get('/houses', [HouseController::class, 'indexProperties'])->name('houses');
+
+    Route::get('/reserves', [ReservesController::class, 'index'])->name('reservations');
     
     Route::get('/reserva', [ReservesController::class, 'indexProperties'])->name('reservations.index');
 

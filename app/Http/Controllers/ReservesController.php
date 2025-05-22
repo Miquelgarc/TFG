@@ -56,6 +56,34 @@ class ReservesController extends Controller
             'houses' => $houses
         ]);
     }
+    public function index()
+    {
+        $user = Auth::user();
+
+        if ($user->role_name === 'afiliat') {
+            $reservations = Reservation::where('user_id', $user->id)->with(['property'])->get();
+        } elseif ($user->role_name === 'admin') {
+            $reservations = Reservation::with(['property'])->get();
+        } else {
+            return redirect()->route('home');
+        }
+        // Filtros de búsqueda
+        if ($search = request('search')) {
+            $reservations->whereHas('property', function ($query) use ($search) {
+                $query->where('title', 'like', "%{$search}%");
+            });
+        }
+        if ($date = request('date')) {
+            $reservations->whereDate('created_at', $date);
+        }
+        if ($status = request('status')) {
+            $reservations->where('status', $status);
+        }
+
+        return Inertia::render('Reserva', [
+            'reservations' => $reservations,
+        ]);
+    }
 
     public function indexProperties()
     {
