@@ -13,11 +13,17 @@ class AfiliatController extends Controller
     public function index()
     {
         $user = auth()->user();
-        return Inertia::render('InfoAfiliat', [
-            'auth' => [
-                'user' => $user,
-            ],
-        ]);
+
+        
+        if ($user->role() === 'admin') {
+            return redirect()->route('afiliats');
+        } elseif ( $user->role() === 'afiliat') {
+            return Inertia::render('infoAfiliat', [
+                'auth' => [
+                    'user' => $user,
+                ],
+            ]);
+        }
     }
 
 }

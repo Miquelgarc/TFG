@@ -40,7 +40,7 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
         if (in_array($request->user()->status, ['rejected', 'pending'])) {
             Auth::guard('web')->logout();
-            return redirect('/status-account');
+            return redirect('/');
         }
         $request->session()->regenerate();
 
