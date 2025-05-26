@@ -89,7 +89,11 @@ interface Filters {
 }
 interface FiltersCommission {
     search?: string;
-    generated_at?: string;
+    date_from?: string;
+    date_to?: string;
+    order_by?: string;
+    order_dir?: string;
+    affiliate_id?: number;
     page?: number;
 }
 interface FiltersLinks {

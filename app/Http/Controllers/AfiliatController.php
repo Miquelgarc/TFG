@@ -17,8 +17,8 @@ class AfiliatController extends Controller
         
         if ($user->role() === 'admin') {
             return redirect()->route('afiliats');
-        } elseif ( $user->role() === 'afiliat') {
-            return Inertia::render('infoAfiliat', [
+        } elseif ( !$user->is_admin()) {
+            return Inertia::render('InfoAfiliat', [
                 'auth' => [
                     'user' => $user,
                 ],

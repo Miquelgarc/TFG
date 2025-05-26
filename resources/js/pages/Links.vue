@@ -101,9 +101,9 @@ function exportData(format: 'csv' | 'xlsx') {
 
         <div class="p-4 sm:p-6 bg-white dark:bg-[#0A0A0A] transition-colors duration-300">
             <!-- Filtros -->
-            <div class="mb-6 flex flex-wrap gap-4">
+            <div class="mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
                 <input v-model="filters.search" @input="updateLinks" placeholder="Buscar..."
-                    class="input flex-1 min-w-[200px] px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-400 transition" />
+                    class="input w-full sm:w-1/3 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200" />
 
                 <!-- Rango de fechas -->
                 <input type="date" v-model="filters.date_from" @change="updateLinks"

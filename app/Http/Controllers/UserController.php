@@ -97,16 +97,19 @@ class UserController extends Controller
 
 
         // Filtro por búsqueda en descripción
-        if ($search = $request->input('search')) {
-            $query->where('description', 'like', "%{$search}%", );
+        if ($request->search) {
+            $query->where('description', 'like', "%{$request->search}%", );
             if ($user->role_name === 'admin') {
-                $query->orWhere('users.name', 'like', "%{$search}%");
+                $query->orWhere('users.name', 'like', "%{$request->search}%");
             }
         }
 
-        // Filtro por fecha (opcional)
-        if ($date = $request->input('date')) {
-            $query->whereDate('commissions.generated_at', $date);
+        if ($request->date_from) {
+            $query->whereDate('commissions.generated_at', '>=', $request->date_from);
+        }
+
+        if ($request->date_to) {
+            $query->whereDate('commissions.generated_at', '<=', $request->date_to);
         }
 
         $comisions = $query->with('afiliat')->orderByDesc('generated_at')->paginate(12)->withQueryString();
@@ -139,16 +142,24 @@ class UserController extends Controller
             $query->where('affiliate_id', $user->id);
         }
 
+
         $query->join('users', 'affiliate_links.affiliate_id', '=', 'users.id')
             ->select('affiliate_links.*', 'users.name as affiliate_name');
 
         if ($request->search) {
-            $query->where('description', 'like', "%{$request->search}%")
-                ->orWhere('users.name', 'like', "%{$request->search}%");
+            $query->where('affiliate_links.generated_url', 'like', "%{$request->search}%");
         }
 
-        if ($request->date) {
-            $query->whereDate('affiliate_links.created_at', $request->date);
+        if ($request->date_from) {
+            $query->whereDate('affiliate_links.created_at', '>=', $request->date_from);
+        }
+
+        if ($request->date_to) {
+            $query->whereDate('affiliate_links.created_at', '<=', $request->date_to);
+        }
+
+        if ($request->affiliate_id) {
+            $query->where('affiliate_links.affiliate_id', $request->affiliate_id);
         }
 
 
@@ -166,7 +177,44 @@ class UserController extends Controller
         ]);
 
     }
-    public function export(Request $request)
+    public function exportComisions(Request $request)
+    {
+        $query = Comisions::query();
+
+        if ($request->search) {
+            $query->where('description', 'like', "%{$request->search}%");
+        }
+
+        if ($request->date) {
+            $query->whereDate('generated_at', $request->date);
+        }
+
+        if (Auth::user()->role_name === 'affiliate') {
+            $query->where('affiliate_id', Auth::id());
+        }
+
+        $comisions = $query->with('afiliat')->get();
+
+        if ($request->export === 'csv') {
+            return response()->streamDownload(function () use ($comisions) {
+                $handle = fopen('php://output', 'w');
+                fputcsv($handle, ['Afiliado', 'Descripción', 'Importe', 'Fecha']);
+                foreach ($comisions as $comision) {
+                    fputcsv($handle, [
+                        $comision->afiliat->name ?? '',
+                        $comision->description,
+                        number_format($comision->amount, 2, ',', '.'),
+                        $comision->generated_at->format('d/m/Y'),
+                    ]);
+                }
+                fclose($handle);
+            }, 'comisions.csv');
+        }
+
+        abort(400, 'Formato no válido');
+
+    }
+    public function exportLink(Request $request)
     {
         $query = Link::query()->with('affiliate');
 

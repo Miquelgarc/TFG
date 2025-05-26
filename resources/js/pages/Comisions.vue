@@ -9,31 +9,39 @@ const page = usePage<MyPageProps>();
 const comisions = page.props.comisions;
 const filteredComisions = ref(deepClone(comisions?.data ?? []));
 const isAdmin = page.props.auth.user?.role_name === 'admin';
+const loading = ref(false);
+
 const filters = reactive({
     search: page.props.filtersCommission?.search ?? '',
-    generated_at: page.props.filtersCommission?.generated_at ?? '',
+    date_from: page.props.filtersCommission?.date_from ?? '',
+    date_to: page.props.filtersCommission?.date_to ?? '',
+    affiliate_id: page.props.filtersCommission?.affiliate_id ?? '',
+    order_by: page.props.filtersCommission?.order_by ?? '',
+    order_dir: page.props.filtersCommission?.order_dir ?? '',
     page: page.props.filtersCommission?.page ?? 1,
 });
 
 function changePage(pageNum: number) {
     filters.page = pageNum;
-    router.get(route('comisions'), {
-        search: filters.search,
-        date: filters.generated_at,
-        page: pageNum,
-    }, {
-        preserveState: true,
-        replace: false,
-    });
+    updateComisions();
 }
 
 function updateComisions() {
     router.get(route('comisions'), {
         search: filters.search,
-        date: filters.generated_at,
+        date_from: filters.date_from,
+        date_to: filters.date_to,
+        affiliate_id: filters.affiliate_id,
+        order_by: filters.order_by,
+        order_dir: filters.order_dir,
+        page: filters.page,
     }, {
         preserveState: true,
         replace: false,
+        onFinish: () => {
+            // Actualizar la lista filtrada después de la petición
+            loading.value = false;
+        },
     });
 }
 
@@ -44,15 +52,31 @@ watch(() => page.props.comisions, (newComs) => {
 
 function resetFilters() {
     filters.search = '';
-    filters.generated_at = '';
-    router.get(route('comisions'), {
-        search: '',
-        date: '',
-    }, {
-        preserveState: true,
-        replace: true
-    });
+    filters.date_from = '';
+    filters.date_to = '';
+    filters.order_by = '';
+    filters.order_dir = '';
+    filters.page = 1;
     updateComisions();
+}
+
+function sortBy(field: string) {
+    if (filters.order_by === field) {
+        filters.order_dir = filters.order_dir === 'asc' ? 'desc' : 'asc';
+    } else {
+        filters.order_by = field;
+        filters.order_dir = 'asc';
+    }
+    updateComisions();
+}
+
+function exportData(format: 'csv' | 'xlsx') {
+    const params = {
+        ...filters,
+        export: format,
+    };
+    const query = new URLSearchParams(params as any).toString();
+    window.open(route('links.export') + '?' + query, '_blank');
 }
 </script>
 
@@ -67,8 +91,20 @@ function resetFilters() {
             <div class="mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
                 <input v-model="filters.search" @input="updateComisions" placeholder="Buscar..."
                     class="input w-full sm:w-1/3 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200" />
-                <input v-model="filters.generated_at" @change="updateComisions" type="date"
-                    class="input px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200" />
+                <input type="date" v-model="filters.date_from" @change="updateComisions"
+                    class="input px-4 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
+                <input type="date" v-model="filters.date_to" @change="updateComisions"
+                    class="input px-4 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
+
+                <!-- Filtro por afiliado (solo admin) -->
+                <select v-if="isAdmin" v-model="filters.affiliate_id" @change="updateComisions"
+                    class="input px-4 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                    <option value="">Todos los afiliados</option>
+                    <option v-for="user in (page.props.affiliates as Array<{ id: number | string; name: string }>)"
+                        :key="user.id" :value="user.id">
+                        {{ user.name }}
+                    </option>
+                </select>
                 <!-- <button @click="updateComisions"
                     class="btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
                     Buscar
@@ -86,18 +122,29 @@ function resetFilters() {
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 shadow-sm">
                         <thead class="bg-chart-3 text-white dark:bg-chart-1">
                             <tr>
-                                <th v-if="isAdmin"
+                                <th v-if="isAdmin" @click="sortBy('affiliate_name')"
                                     class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
                                     Nom Afiliat
                                 </th>
-                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
+                                <th @click="sortBy('descripcio')"
+                                    class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
                                     Descripció
+                                    <span v-if="filters.order_by === 'descripcio'" class="ml-1">
+                                        {{ filters.order_dir === 'asc' ? '↑' : '↓' }}
+                                    </span>
                                 </th>
-                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
+                                <th @click="sortBy('quantitat')"
+                                    class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
                                     Quantitat
+                                    <span v-if="filters.order_by === 'quantitat'" class="ml-1">
+                                        {{ filters.order_dir === 'asc' ? '↑' : '↓' }}
+                                    </span>
                                 </th>
-                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
+                                <th @click="sortBy('generated_at')" class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
                                     Data
+                                    <span v-if="filters.order_by === 'generated_at'" class="ml-1">
+                                        {{ filters.order_dir === 'asc' ? '↑' : '↓' }}
+                                    </span>
                                 </th>
                             </tr>
                         </thead>
@@ -150,7 +197,7 @@ function resetFilters() {
 
                         <div class="text-sm text-gray-500 dark:text-gray-400">Data</div>
                         <div class="text-gray-700 dark:text-gray-300">{{ new Date(c.generated_at).toLocaleDateString()
-                            }}</div>
+                        }}</div>
                     </div>
                 </template>
                 <template v-else>
@@ -159,7 +206,12 @@ function resetFilters() {
                     </div>
                 </template>
             </div>
-
+            <div class="flex gap-2 mt-4">
+                <button @click="exportData('csv')"
+                    class="btn text-white hover:bg-gray-600 px-4 py-2 rounded-md text-sm transition">
+                    Exportar CSV
+                </button>
+            </div>
 
             <!-- Paginación -->
             <div v-if="(comisions?.last_page ?? 0) > 1" class="mt-6 flex flex-wrap justify-center gap-2">

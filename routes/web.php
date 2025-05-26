@@ -15,8 +15,6 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/dashboard', fn() => Inertia::render('Dashboard'))->name('dashboard');
-
     Route::get('/info-afiliat', [AfiliatController::class, 'index'])->name('infoAfiliat');
 
     Route::get('/afiliats', [UserController::class, 'indexAfiliats'])->name('afiliats');
@@ -27,9 +25,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/afiliats/comisions', [UserController::class, 'Comisions'])->name(name: 'comisions');
 
+    Route::get('/afiliats/comisions/export', [UserController::class, 'exportComisions'])->name('comisions.export');
     Route::get('/afiliats/links', [UserController::class, 'Links'])->name('links');
 
-    Route::get('/afiliats/links/export', [UserController::class, 'export'])->name('links.export');
+    Route::get('/afiliats/links/export', [UserController::class, 'exportLink'])->name('links.export');
+
+
 
     Route::get('/houses', [HouseController::class, 'indexProperties'])->name('houses');
 

@@ -80,7 +80,7 @@ class ReservesController extends Controller
             $reservations->where('status', $status);
         }
 
-        return Inertia::render('Reserva', [
+        return Inertia::render('Reservas', [
             'reservations' => $reservations,
         ]);
     }

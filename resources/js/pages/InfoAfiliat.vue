@@ -20,9 +20,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 </script>
 
 <template>
-    <Head title="Dashboard" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
+        <Head title="Info afiliat" />
         <div class="p-6">
             <h1 v-if="user" class="text-2xl font-bold mb-4">{{ user?.company_name }}</h1>
             <p>{{ user?.name }}</p>
