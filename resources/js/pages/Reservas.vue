@@ -97,7 +97,7 @@ watch(() => page.props.reservas, (newData) => {
                                     {{ r.user?.name ?? 'N/A' }}
                                 </td>
                                 <td class="px-6 py-4 text-gray-900 dark:text-gray-100">
-                                    {{ r.house?.title ?? 'N/A' }}
+                                    {{ r.property?.title ?? 'N/A' }}
                                 </td>
                                 <td class="px-6 py-4 text-gray-600 dark:text-gray-300">
                                     {{ new Date(r.check_in_date).toLocaleDateString() }}
@@ -128,7 +128,7 @@ watch(() => page.props.reservas, (newData) => {
                     </tbody>
                 </table>
                 <div class="mt-6 flex justify-center gap-2">
-                    <button v-for="pageNum in reservations?.meta?.last_page" :key="pageNum" @click="changePage(pageNum)"
+                    <button v-for="pageNum in reservations?.last_page" :key="pageNum" @click="changePage(pageNum)"
                         :class="[
                             'px-4 py-2 rounded-md',
                             filters.page === pageNum ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-white'

@@ -48,6 +48,10 @@ export interface MyPageProps extends PageProps {
     reservas?: Pagination<Reservas>;
     comisions?: Pagination<Commission>;
     afiliates?: Pagination<Afiliado>;
+    comisionesMensuales: Comision[];
+    comisionesSemanales: ComisionSemanal[];
+    linksTop: LinksTop[];
+
     auth: {
         user: AuthUser | null;
     };
@@ -77,12 +81,29 @@ interface Commission {
     description: string;
     generated_at: string;
 }
+
+interface Comision {
+    mes: string;
+    total: number;
+}
+
+interface ComisionSemanal {
+    semana: number;
+    semana_nombre: string;
+    total: number;
+}
 interface Links {
     target_url: string;
     generated_url: string;
     clicks: string;
     conversions: string;
     created_at: string;
+}
+
+interface LinksTop {
+    url: string;
+    clicks: number;
+    conversions: number;
 }
 
 interface Reservas {
@@ -140,11 +161,11 @@ interface Pagination<T> {
 }
 
 interface AfiliadoPagination {
-  data: Afiliado[];
-  current_page: number;
-  last_page: number;
-  total: number;
-  per_page: number;
+    data: Afiliado[];
+    current_page: number;
+    last_page: number;
+    total: number;
+    per_page: number;
 }
 
 

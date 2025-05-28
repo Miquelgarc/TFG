@@ -60,19 +60,34 @@ class ReservesController extends Controller
     {
         $user = Auth::user();
 
-        $query = Reservation::query()->with(['property', 'user']);
+        $query = Reservation::query()->with([
+            'property',
+            'user',
+            'affiliateLink.affiliateUser' // el afiliado
+        ]);
 
-        // Filtro por tipo de usuario
-        if ($user->role_name === 'afiliat') {
-            $query->where('user_id', $user->id);
-        } elseif ($user->role_name !== 'admin') {
-            return redirect()->route('home');
+        // FILTRO POR TIPO DE USUARIO
+        if ($user->role_name === 'affiliate') {
+            // Solo ver reservas relacionadas a los links del afiliado
+            $query->whereHas('affiliateLink', function ($q) use ($user) {
+                $q->where('affiliate_id', $user->id);
+            });
         }
 
-        // Filtros dinámicos
+        // FILTROS DINÁMICOS
         if ($search = $request->input('search')) {
-            $query->whereHas('property', function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search, $user) {
+                // Buscar por título de propiedad
+                $q->whereHas('property', function ($q2) use ($search) {
+                    $q2->where('title', 'like', "%{$search}%");
+                });
+
+                // Si es admin, buscar también por nombre del afiliado
+                if ($user->role_name === 'admin') {
+                    $q->orWhereHas('affiliateLink.user', function ($q3) use ($search) {
+                        $q3->where('name', 'like', "%{$search}%");
+                    });
+                }
             });
         }
 
@@ -88,14 +103,15 @@ class ReservesController extends Controller
             $query->whereDate('check_out_date', '<=', $to);
         }
 
-        // Paginar resultados
-        $reservations = $query->orderBy('created_at', 'desc')->paginate(10)->appends($request->all());
+        // PAGINAR
+        $reservations = $query->orderByDesc('created_at')->paginate(10)->appends($request->all());
 
         return Inertia::render('Reservas', [
             'reservas' => $reservations,
             'filtersReseras' => $request->only(['search', 'status', 'date_from', 'date_to', 'page']),
         ]);
     }
+
 
 
     public function indexProperties()

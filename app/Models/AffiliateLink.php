@@ -14,8 +14,14 @@ class AffiliateLink extends Model
         'conversions',
     ];
 
-    public function affiliate()
+
+    public function affiliateUser()
     {
-        return $this->belongsTo(User::class, 'affiliate_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class);
+    }
+
 }

@@ -65,4 +65,10 @@ class User extends Authenticatable
     {
         return $this->role?->name === 'admin';
     }
+
+    public function affiliateLinks()
+    {
+        return $this->hasMany(AffiliateLink::class);
+    }
+
 }

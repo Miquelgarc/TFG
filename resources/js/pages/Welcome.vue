@@ -74,14 +74,14 @@ const page = usePage<PageProps>();
                 <h2 class="text-3xl font-bold text-center mb-6 text-[#222] dark:text-white">Per què unir-t'hi?</h2>
                 <div class="grid md:grid-cols-2 gap-6">
                     <BenefitCard title="Sense inversió inicial"
-                        text="Comença a guanyar sense necessitat de tenir una propietat o pagar quotes." icon="💸" />
+                        text="Comença a guanyar sense necessitat de tenir una propietat o pagar quotes." icon="" />
                     <BenefitCard title="Seguiment en temps real"
                         text="Monitora els teus clics, conversions i comissions des del teu panell personal."
-                        icon="📊" />
+                        icon="" />
                     <BenefitCard title="Pagaments ràpids"
-                        text="Rep els teus pagaments mensualment al teu compte bancari o PayPal." icon="⚡" />
+                        text="Rep els teus pagaments mensualment al teu compte bancari o PayPal." icon="" />
                     <BenefitCard title="Material promocional"
-                        text="Accedeix a imatges, bàners i textos per ajudar-te a promocionar." icon="📢" />
+                        text="Accedeix a imatges, bàners i textos per ajudar-te a promocionar." icon="" />
                 </div>
             </section>
 
