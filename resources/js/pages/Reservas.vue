@@ -48,10 +48,10 @@ watch(() => page.props.reservas, (newData) => {
 
 <template>
     <AppLayout title="Reservas">
+
         <Head title="Reservas" />
 
         <div class="p-4 sm:p-6 bg-white dark:bg-[#0A0A0A] transition-colors duration-300">
-            <!-- Filtros -->
             <div class="mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
                 <input v-model="filters.search" @input="updateReservations" placeholder="Buscar..."
                     class="input w-full sm:w-1/3 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200" />
@@ -76,7 +76,6 @@ watch(() => page.props.reservas, (newData) => {
                 </button>
             </div>
 
-            <!-- Tabla -->
             <div class="overflow-x-auto rounded-lg shadow-lg transition-shadow duration-300">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 shadow-sm">
                     <thead class="bg-chart-3 text-white dark:bg-chart-1">
@@ -85,7 +84,8 @@ watch(() => page.props.reservas, (newData) => {
                             <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Propiedad</th>
                             <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Entrada</th>
                             <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Salida</th>
-                            <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Precio Total</th>
+                            <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Precio Total
+                            </th>
                             <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Estado</th>
                         </tr>
                     </thead>
@@ -105,7 +105,8 @@ watch(() => page.props.reservas, (newData) => {
                                 <td class="px-6 py-4 text-gray-600 dark:text-gray-300">
                                     {{ new Date(r.check_out_date).toLocaleDateString() }}
                                 </td>
-                                <td class="px-6 py-4 text-chart-2 font-bold">€{{ Number(r.total_price).toFixed(2) }}</td>
+                                <td class="px-6 py-4 text-chart-2 font-bold">€{{ Number(r.total_price).toFixed(2) }}
+                                </td>
                                 <td class="px-6 py-4">
                                     <span :class="{
                                         'text-yellow-600': r.status === 'pending',
@@ -126,6 +127,15 @@ watch(() => page.props.reservas, (newData) => {
                         </template>
                     </tbody>
                 </table>
+                <div class="mt-6 flex justify-center gap-2">
+                    <button v-for="pageNum in reservations?.meta?.last_page" :key="pageNum" @click="changePage(pageNum)"
+                        :class="[
+                            'px-4 py-2 rounded-md',
+                            filters.page === pageNum ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-white'
+                        ]">
+                        {{ pageNum }}
+                    </button>
+                </div>
             </div>
         </div>
     </AppLayout>

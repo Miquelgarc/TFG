@@ -56,34 +56,47 @@ class ReservesController extends Controller
             'houses' => $houses
         ]);
     }
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
 
+        $query = Reservation::query()->with(['property', 'user']);
+
+        // Filtro por tipo de usuario
         if ($user->role_name === 'afiliat') {
-            $reservations = Reservation::where('user_id', $user->id)->with(['property'])->get();
-        } elseif ($user->role_name === 'admin') {
-            $reservations = Reservation::with(['property'])->get();
-        } else {
+            $query->where('user_id', $user->id);
+        } elseif ($user->role_name !== 'admin') {
             return redirect()->route('home');
         }
-        // Filtros de búsqueda
-        if ($search = request('search')) {
-            $reservations->whereHas('property', function ($query) use ($search) {
-                $query->where('title', 'like', "%{$search}%");
+
+        // Filtros dinámicos
+        if ($search = $request->input('search')) {
+            $query->whereHas('property', function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%");
             });
         }
-        if ($date = request('date')) {
-            $reservations->whereDate('created_at', $date);
-        }
-        if ($status = request('status')) {
-            $reservations->where('status', $status);
+
+        if ($status = $request->input('status')) {
+            $query->where('status', $status);
         }
 
+        if ($from = $request->input('date_from')) {
+            $query->whereDate('check_in_date', '>=', $from);
+        }
+
+        if ($to = $request->input('date_to')) {
+            $query->whereDate('check_out_date', '<=', $to);
+        }
+
+        // Paginar resultados
+        $reservations = $query->orderBy('created_at', 'desc')->paginate(10)->appends($request->all());
+
         return Inertia::render('Reservas', [
-            'reservations' => $reservations,
+            'reservas' => $reservations,
+            'filtersReseras' => $request->only(['search', 'status', 'date_from', 'date_to', 'page']),
         ]);
     }
+
 
     public function indexProperties()
     {
