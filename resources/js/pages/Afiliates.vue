@@ -7,7 +7,6 @@ import Swal from 'sweetalert2';
 import type { SweetAlertResult } from 'sweetalert2';
 import axios from 'axios';
 import { toast } from 'vue3-toastify';
-import { deepClone } from '@/utils/utils.js';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -19,7 +18,23 @@ const breadcrumbs: BreadcrumbItem[] = [
 const page = usePage<MyPageProps>();
 
 const afiliates = page.props.afiliates as AfiliadoPagination;
-const filteredList = ref(deepClone(afiliates.data));
+import { computed } from 'vue';
+
+const filteredList = computed(() => {
+    return afiliates.data.filter((afiliat: any) => {
+        const matchesSearch =
+            !filters.search ||
+            afiliat.name.toLowerCase().includes(filters.search.toLowerCase()) ||
+            afiliat.email.toLowerCase().includes(filters.search.toLowerCase()) ||
+            afiliat.company_name.toLowerCase().includes(filters.search.toLowerCase());
+
+        const matchesStatus =
+            !filters.status || afiliat.status === filters.status;
+
+        return matchesSearch && matchesStatus;
+    });
+});
+
 
 const filters = reactive({
     search: page.props.filters?.search ?? '',
@@ -37,27 +52,7 @@ const toggleDropdown = (id: number) => {
 }
 
 
-const changeStatus = async (id: number, status: string) => {
-    try {
-        await axios.post(`/afiliats/${id}/cambiar-estat`, { status });
-        const afiliat = afiliates.data.find(a => a.id === id)
-        if (afiliat) afiliat.status = status
-        dropdownVisibleId.value = null
-        toast.success('Estado actualizado correctamente');
-        router.get(route('afiliats'), {
-            search: filters.search,
-            status: filters.status,
-        }, {
-            preserveState: false,
-            replace: true,
-        });
 
-
-    } catch (error) {
-        toast.error('Error al cambiar el estado');
-        console.error(error);
-    }
-};
 const handleClickOutside = (event: MouseEvent) => {
     const dropdownEl = dropdownRef.value as HTMLElement | null;
     if (
@@ -107,23 +102,25 @@ watch(() => filters.status, (newVal) => {
     console.log('Nuevo status:', newVal);
 });
 
-// Filtre
-watch(filters, (newFilters) => {
-    filteredList.value = afiliates.data.filter((afiliat: any) => {
-        const matchesSearch =
-            !newFilters.search ||
-            afiliat.name.toLowerCase().includes(newFilters.search.toLowerCase()) ||
-            afiliat.email.toLowerCase().includes(newFilters.search.toLowerCase()) ||
-            afiliat.company_name.toLowerCase().includes(newFilters.search.toLowerCase());
-
-        const matchesStatus =
-            !newFilters.status || afiliat.status === newFilters.status;
-
-        return matchesSearch && matchesStatus;
-    });
-}, { deep: true });
 
 
+const changeStatus = async (id: number, status: string) => {
+    try {
+        await axios.post(`/afiliats/${id}/cambiar-estat`, { status });
+
+        const afiliat = afiliates.data.find(a => a.id === id)
+        if (afiliat) afiliat.status = status
+
+        dropdownVisibleId.value = null
+        toast.success('Estado actualizado correctamente');
+
+        // No need to assign to filteredList.value; it will update automatically as a computed property.
+
+    } catch (error) {
+        toast.error('Error al cambiar el estado');
+        console.error(error);
+    }
+};
 
 function changePage(pageNum: number) {
     router.get(
@@ -164,14 +161,18 @@ function changePage(pageNum: number) {
                             <tr>
                                 <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Nom</th>
                                 <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Email</th>
-                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Empresa</th>
-                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Website</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Empresa
+                                </th>
+                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Website
+                                </th>
                                 <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Estat</th>
-                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Accions</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Accions
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="afiliat in filteredList" :key="afiliat.id" class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                            <tr v-for="afiliat in filteredList" :key="afiliat.id"
+                                class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
                                 <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ afiliat.name }}</td>
                                 <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ afiliat.email }}</td>
                                 <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ afiliat.company_name }}</td>

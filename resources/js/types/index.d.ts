@@ -44,6 +44,8 @@ export interface MyPageProps extends PageProps {
     filtersCommission?: FiltersCommission;
     links?: Pagination<Links>;
     filtersLinks?: FiltersLinks;
+    filtersReseras?: FiltersReservas;
+    reservas?: Pagination<Reservas>;
     comisions?: Pagination<Commission>;
     afiliates?: Pagination<Afiliado>;
     auth: {
@@ -81,6 +83,29 @@ interface Links {
     clicks: string;
     conversions: string;
     created_at: string;
+}
+
+interface Reservas {
+    property_name: string;
+    afiliate_link: string;
+    afiliate_name: string;
+    check_in: string;
+    check_out: string;
+    total: string;
+    commission: string;
+    status: string;
+    created_at: string;
+}
+
+interface FiltersReservas {
+    search?: string;
+    date_from?: string;
+    date_to?: string;
+    order_by?: string;
+    order_dir?: string;
+    affiliate_id?: number;
+    page?: number;
+    status?: string;
 }
 
 interface Filters {

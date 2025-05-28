@@ -44,7 +44,7 @@ class AuthenticatedSessionController extends Controller
         }
         $request->session()->regenerate();
 
-        return ($request->user()->is_admin)
+        return ($request->user()->is_admin())
             ? redirect()->intended('/afiliats')
             : redirect()->intended('/info-afiliat');
     }

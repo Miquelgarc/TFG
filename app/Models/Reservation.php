@@ -10,7 +10,7 @@ class Reservation extends Model
         'property_id', 'user_id', 'affiliate_link_id', 'check_in_date', 'check_out_date', 'total_price', 'status', 'created_at'
     ];
 
-    public function house()
+    public function property()
     {
         return $this->belongsTo(Property::class);
     }

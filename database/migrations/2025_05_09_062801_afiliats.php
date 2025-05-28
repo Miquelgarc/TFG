@@ -50,27 +50,6 @@ return new class extends Migration {
                     $table->timestamps();
                 }); */
 
-        // Taula d'enllaços d'afiliats
-        Schema::create('affiliate_links', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('affiliate_id')->constrained('users')->onDelete('cascade');
-            $table->string('target_url');
-            $table->string('generated_url')->unique();
-            $table->unsignedInteger('clicks')->default(0);
-            $table->unsignedInteger('conversions')->default(0);
-            $table->timestamps();
-        });
-
-        // Taula de comissions
-        Schema::create('commissions', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('affiliate_id')->constrained('users')->onDelete('cascade');
-            $table->decimal('amount', 8, 2);
-            $table->string('description')->nullable();
-            $table->timestamp('generated_at');
-            $table->timestamps();
-        });
-
         Schema::create('rental_properties', function (Blueprint $table) {
             $table->id();
             $table->string('title');
@@ -82,11 +61,15 @@ return new class extends Migration {
             $table->boolean('is_available')->default(true);
             $table->timestamps();
         });
-
-        Schema::create('property_links', function (Blueprint $table) {
+        // Taula d'enllaços d'afiliats
+        Schema::create('affiliate_links', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('affiliate_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('property_id')->constrained('rental_properties')->onDelete('cascade');
-            $table->foreignId('affiliate_link_id')->constrained('affiliate_links')->onDelete('cascade');
+            $table->string('target_url');
+            $table->string('generated_url')->unique();
+            $table->unsignedInteger('clicks')->default(0);
+            $table->unsignedInteger('conversions')->default(0);
             $table->timestamps();
         });
 
@@ -98,9 +81,33 @@ return new class extends Migration {
             $table->date('check_in_date');
             $table->date('check_out_date');
             $table->decimal('total_price', 10, 2);
-            $table->enum('status', ['pending', 'confirmed', 'cancelled'])->default('pending');
+            $table->enum('status', ['pending', 'confirmed', 'cancelled', 'charged'])->default('pending');
             $table->timestamps();
         });
+
+        // Taula de comissions
+        Schema::create('commissions', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('affiliate_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('reservation_id')->constrained('reservations')->onDelete('cascade');
+            $table->boolean('is_paid')->default(false);
+            $table->timestamp('paid_at')->nullable();
+            $table->decimal('amount', 8, 2);
+            $table->enum('status', ['pending', 'approved', 'paid'])->default('pending');
+            $table->string('description')->nullable();
+            $table->timestamp('generated_at')->useCurrent();
+            $table->timestamps();
+
+        });
+
+
+        Schema::create('property_links', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('property_id')->constrained('rental_properties')->onDelete('cascade');
+            $table->foreignId('affiliate_link_id')->constrained('affiliate_links')->onDelete('cascade');
+            $table->timestamps();
+        });
+
 
         Schema::create('affiliate_clicks', function (Blueprint $table) {
             $table->id();
@@ -125,11 +132,14 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('affiliate_requests');
+        Schema::dropIfExists('affiliate_clicks');
+        Schema::dropIfExists('property_links');
+        Schema::dropIfExists('reservations');
         Schema::dropIfExists('commissions');
         Schema::dropIfExists('affiliate_links');
-        Schema::dropIfExists('affiliates');
+        Schema::dropIfExists('rental_properties');
         Schema::dropIfExists('users');
         Schema::dropIfExists('roles');
     }
+
 };
