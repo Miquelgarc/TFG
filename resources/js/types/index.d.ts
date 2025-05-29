@@ -101,9 +101,10 @@ interface Links {
 }
 
 interface LinksTop {
-    url: string;
+    generated_url: string;
     clicks: number;
     conversions: number;
+    total_reservas: number;
 }
 
 interface Reservas {

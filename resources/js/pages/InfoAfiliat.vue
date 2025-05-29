@@ -2,10 +2,10 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
 import type { MyPageProps } from '@/types';
+import { Bar } from 'vue-chartjs'
 
-// Chart.js imports
 import {
     Chart as ChartJS,
     Title,
@@ -15,28 +15,36 @@ import {
     CategoryScale,
     LinearScale
 } from 'chart.js'
-import { Bar } from 'vue-chartjs'
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
 const page = usePage<MyPageProps>();
 const user = computed(() => page.props.auth.user ?? null);
 const linksTop = computed(() => page.props.linksTop ?? []);
+const isDark = ref(false);
 
-
-// ✅ Asegúrate de que `comisionesMensuales` venga desde el backend
 const comisionesSemanales = computed(() => page.props.comisionesSemanales ?? []);
 
 const totalSemanal = computed(() =>
     comisionesSemanales.value.reduce((sum, item) => sum + Number(item.total), 0)
 );
 
+onMounted(() => {
+    isDark.value = document.documentElement.classList.contains('dark');
+
+    // Escucha cambios en el DOM por si el tema cambia
+    const observer = new MutationObserver(() => {
+        isDark.value = document.documentElement.classList.contains('dark');
+    });
+
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+});
 
 const chartDataSemanal = computed(() => ({
     labels: comisionesSemanales.value.map(item => item.semana_nombre),
     datasets: [
         {
-            label: 'Comisiones (€) Semanales',
+            label: 'Comisiones (€) Setmanals',
             data: comisionesSemanales.value.map(item => item.total),
             backgroundColor: '#4f46e5',
         }
@@ -44,18 +52,61 @@ const chartDataSemanal = computed(() => ({
 }));
 
 
-const chartOptions = ref({
-    responsive: true,
-    plugins: {
-        legend: {
-            position: 'top' as const,
+const chartOptions = ref({});
+
+const updateChartOptions = (dark: boolean) => {
+    chartOptions.value = {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top' as const,
+                labels: {
+                    color: dark ? '#ffffff' : '#000000',
+                }
+            },
+            title: {
+                display: true,
+                text: 'Comisiones por semana',
+                color: dark ? '#ffffff' : '#000000',
+            },
+            tooltip: {
+                backgroundColor: dark ? '#1f2937' : '#f9fafb', // gris oscuro o claro
+                titleColor: dark ? '#ffffff' : '#000000',
+                bodyColor: dark ? '#ffffff' : '#000000',
+                borderColor: dark ? '#ffffff22' : '#00000022',
+                borderWidth: 1,
+            }
         },
-        title: {
-            display: true,
-            text: 'Comisiones por mes'
+        scales: {
+            x: {
+                ticks: {
+                    color: dark ? '#ffffff' : '#000000',
+                },
+                grid: {
+                    color: dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
+                }
+            },
+            y: {
+                ticks: {
+                    color: dark ? '#ffffff' : '#000000',
+                },
+                grid: {
+                    color: dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
+                }
+            }
         }
-    }
-})
+    };
+};
+
+
+watch(isDark, (newVal) => {
+    updateChartOptions(newVal);
+});
+
+// Llamar inicialmente
+onMounted(() => updateChartOptions(isDark.value));
+
+
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -78,14 +129,36 @@ const breadcrumbs: BreadcrumbItem[] = [
                 <p class="mt-4">Email: {{ user?.email }}</p>
             </div>
 
-            <!-- Gráfico -->
-            <div class="bg-white rounded-xl shadow p-6">
-                <h2 class="text-xl font-semibold mb-4">Resumen de comisiones</h2>
-                <p class="mb-2 font-medium">Total: €{{ totalSemanal.toLocaleString('es-ES', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2 }) }}</p>
-                <Bar :data="chartDataSemanal" :options="chartOptions" />
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <div class="bg-white dark:bg-transparent rounded-xl shadow p-4">
+                    <h2 class="text-lg font-semibold mb-3">Resumen de comisiones</h2>
+                    <p class="mb-2 font-medium">Total: €{{ totalSemanal }}</p>
+                    <div class="h-96">
+                        <Bar :data="chartDataSemanal" :options="chartOptions" />
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-transparent rounded-xl shadow p-4">
+                    <h2 class="text-lg font-semibold mb-3">Links con más reservas</h2>
+                    <ul class="space-y-2">
+                        <li v-for="(link, index) in linksTop" :key="index"
+                            class="flex items-center text-sm bg-grey-100 dark:bg-gray-800 p-3 rounded-lg space-x-3">
+                            <span class="font-bold w-5 text-center">{{ index + 1 }}</span>
+                            <div class="flex-1">
+                                <a :href="link.generated_url" target="_blank"
+                                    class="text-blue-800 dark:text-blue-200 underline truncate block">
+                                    {{ link.generated_url }}
+                                </a>
+                                <span class="text-gray-500 dark:text-gray-300 text-xs">Reservas: {{ link.total_reservas
+                                }}</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
             </div>
+
         </div>
     </AppLayout>
 </template>

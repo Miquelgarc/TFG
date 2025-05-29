@@ -30,8 +30,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/afiliats/links/export', [UserController::class, 'exportLink'])->name('links.export');
 
-
-
     Route::get('/houses', [HouseController::class, 'indexProperties'])->name('houses');
 
     Route::get('/reserves', [ReservesController::class, 'index'])->name('reservations');
