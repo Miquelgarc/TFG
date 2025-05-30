@@ -127,7 +127,9 @@ watch(() => page.props.reservas, (newData) => {
                         </template>
                     </tbody>
                 </table>
-                <div class="mt-6 flex justify-center gap-2">
+                
+            </div>
+            <div class="mt-6 flex justify-center gap-2">
                     <button v-for="pageNum in reservations?.last_page" :key="pageNum" @click="changePage(pageNum)"
                         :class="[
                             'px-4 py-2 rounded-md',
@@ -136,7 +138,6 @@ watch(() => page.props.reservas, (newData) => {
                         {{ pageNum }}
                     </button>
                 </div>
-            </div>
         </div>
     </AppLayout>
 </template>

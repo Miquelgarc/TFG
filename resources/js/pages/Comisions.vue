@@ -87,7 +87,7 @@ function exportData(format: 'csv' | 'xlsx') {
         <Head title="Comisiones" />
 
         <div class="p-4 sm:p-6 bg-white dark:bg-[#0A0A0A] transition-colors duration-300">
-            <!-- Filtros -->
+
             <div class="mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
                 <input v-model="filters.search" @input="updateComisions" placeholder="Buscar..."
                     class="input w-full sm:w-1/3 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200" />
@@ -105,18 +105,14 @@ function exportData(format: 'csv' | 'xlsx') {
                         {{ user.name }}
                     </option>
                 </select>
-                <!-- <button @click="updateComisions"
-                    class="btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
-                    Buscar
-                </button> -->
+                
                 <button @click="resetFilters"
                     class="btn bg-destructive hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
                     Reset
                 </button>
             </div>
 
-            <!-- Tabla -->
-            <!-- Desktop Table -->
+
             <div class="hidden md:block overflow-x-auto rounded-lg shadow-lg transition-shadow duration-300">
                 <div class="transition-all duration-300">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 shadow-sm">
@@ -208,7 +204,7 @@ function exportData(format: 'csv' | 'xlsx') {
             </div>
             <div class="flex gap-2 mt-4">
                 <button @click="exportData('csv')"
-                    class="btn text-white hover:bg-gray-600 px-4 py-2 rounded-md text-sm transition">
+                    class="btn dark:text-white hover:bg-gray-600 px-4 py-2 rounded-md text-sm transition">
                     Exportar CSV
                 </button>
             </div>

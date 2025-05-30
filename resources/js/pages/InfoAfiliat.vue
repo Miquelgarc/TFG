@@ -32,7 +32,6 @@ const totalSemanal = computed(() =>
 onMounted(() => {
     isDark.value = document.documentElement.classList.contains('dark');
 
-    // Escucha cambios en el DOM por si el tema cambia
     const observer = new MutationObserver(() => {
         isDark.value = document.documentElement.classList.contains('dark');
     });
@@ -103,7 +102,6 @@ watch(isDark, (newVal) => {
     updateChartOptions(newVal);
 });
 
-// Llamar inicialmente
 onMounted(() => updateChartOptions(isDark.value));
 
 
