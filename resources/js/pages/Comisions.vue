@@ -2,7 +2,7 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { ref, reactive, watch } from 'vue';
-import type { MyPageProps } from '@/types';
+import type { BreadcrumbItem, MyPageProps } from '@/types';
 import { deepClone } from '@/utils/utils.js';
 
 const page = usePage<MyPageProps>();
@@ -27,6 +27,7 @@ function changePage(pageNum: number) {
 }
 
 function updateComisions() {
+    loading.value = true;
     router.get(route('comisions'), {
         search: filters.search,
         date_from: filters.date_from,
@@ -39,7 +40,6 @@ function updateComisions() {
         preserveState: true,
         replace: false,
         onFinish: () => {
-            // Actualizar la lista filtrada después de la petición
             loading.value = false;
         },
     });
@@ -78,11 +78,17 @@ function exportData(format: 'csv' | 'xlsx') {
     const query = new URLSearchParams(params as any).toString();
     window.open(route('links.export') + '?' + query, '_blank');
 }
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Comissions',
+        href: '/afiliats/comisions',
+    },
+];
 </script>
 
 
 <template>
-    <AppLayout title="Comisiones">
+    <AppLayout :breadcrumbs="breadcrumbs">
 
         <Head title="Comisiones" />
 
@@ -105,7 +111,7 @@ function exportData(format: 'csv' | 'xlsx') {
                         {{ user.name }}
                     </option>
                 </select>
-                
+
                 <button @click="resetFilters"
                     class="btn bg-destructive hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
                     Reset
@@ -113,8 +119,18 @@ function exportData(format: 'csv' | 'xlsx') {
             </div>
 
 
-            <div class="hidden md:block overflow-x-auto rounded-lg shadow-lg transition-shadow duration-300">
-                <div class="transition-all duration-300">
+            <div class="hidden md:block relative rounded-lg shadow-lg transition-shadow duration-300">
+                <div v-if="loading"
+                    class="absolute inset-0 z-10 bg-white/70 dark:bg-[#0A0A0A]/70 flex items-center justify-center rounded-lg">
+                    <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                    </svg>
+                </div>
+
+                <div class="overflow-x-auto min-h-[200px]">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 shadow-sm">
                         <thead class="bg-chart-3 text-white dark:bg-chart-1">
                             <tr>
@@ -122,21 +138,22 @@ function exportData(format: 'csv' | 'xlsx') {
                                     class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
                                     Nom Afiliat
                                 </th>
-                                <th @click="sortBy('descripcio')"
-                                    class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
+                                <th @click="sortBy('description')"
+                                    class="px-6 py-3 text-left text-sm font-medium uppercase cursor-pointer hover:underline tracking-wider">
                                     Descripció
-                                    <span v-if="filters.order_by === 'descripcio'" class="ml-1">
+                                    <span v-if="filters.order_by === 'description'" class="ml-1">
                                         {{ filters.order_dir === 'asc' ? '↑' : '↓' }}
                                     </span>
                                 </th>
-                                <th @click="sortBy('quantitat')"
-                                    class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
+                                <th @click="sortBy('amount')"
+                                    class="px-6 py-3 text-left text-sm font-medium uppercase cursor-pointer hover:underline tracking-wider">
                                     Quantitat
-                                    <span v-if="filters.order_by === 'quantitat'" class="ml-1">
+                                    <span v-if="filters.order_by === 'amount'" class="ml-1">
                                         {{ filters.order_dir === 'asc' ? '↑' : '↓' }}
                                     </span>
                                 </th>
-                                <th @click="sortBy('generated_at')" class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
+                                <th @click="sortBy('generated_at')"
+                                    class="px-6 py-3 text-left text-sm font-medium uppercase cursor-pointer hover:underline tracking-wider">
                                     Data
                                     <span v-if="filters.order_by === 'generated_at'" class="ml-1">
                                         {{ filters.order_dir === 'asc' ? '↑' : '↓' }}
@@ -175,9 +192,35 @@ function exportData(format: 'csv' | 'xlsx') {
                     </table>
                 </div>
             </div>
+            <!-- Filtros de orden móvil -->
+            <div class="md:hidden flex flex-col sm:flex-row gap-3 mb-4">
+                <select v-model="filters.order_by" @change="updateComisions"
+                    class="input px-4 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                    <option disabled value="">Ordenar por...</option>
+                    <option value="description">Descripció</option>
+                    <option value="amount">Quantitat</option>
+                    <option value="generated_at">Data</option>
+                    <option v-if="isAdmin" value="affiliate_name">Nom Afiliat</option>
+                </select>
 
-            <!-- Mobile Cards -->
-            <div class="md:hidden space-y-4">
+                <select v-model="filters.order_dir" @change="updateComisions"
+                    class="input px-4 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                    <option value="asc">Ascendent</option>
+                    <option value="desc">Descendent</option>
+                </select>
+            </div>
+
+            <div class="md:hidden relative space-y-4 min-h-[200px]">
+                <div v-if="loading"
+                    class="absolute inset-0 bg-white/70 dark:bg-[#0A0A0A]/70 z-10 flex items-center justify-center rounded-lg">
+                    <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                    </svg>
+                </div>
+
                 <template v-if="filteredComisions.length">
                     <div v-for="c in filteredComisions" :key="c.id"
                         class="p-4 rounded-lg bg-white dark:bg-gray-800 shadow flex flex-col gap-2 border border-gray-200 dark:border-gray-700">
@@ -204,7 +247,7 @@ function exportData(format: 'csv' | 'xlsx') {
             </div>
             <div class="flex gap-2 mt-4">
                 <button @click="exportData('csv')"
-                    class="btn dark:text-white hover:bg-gray-600 px-4 py-2 rounded-md text-sm transition">
+                    class="btn dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 px-4 py-2 rounded-md text-sm transition">
                     Exportar CSV
                 </button>
             </div>

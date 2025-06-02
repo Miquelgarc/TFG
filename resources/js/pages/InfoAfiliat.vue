@@ -25,9 +25,10 @@ const isDark = ref(false);
 
 const comisionesSemanales = computed(() => page.props.comisionesSemanales ?? []);
 
-const totalSemanal = computed(() =>
-    comisionesSemanales.value.reduce((sum, item) => sum + Number(item.total), 0)
-);
+const totalSemanal = computed(() => {
+    const sum = comisionesSemanales.value.reduce((sum, item) => sum + Number(item.total), 0);
+    return parseFloat(sum.toFixed(2));
+});
 
 onMounted(() => {
     isDark.value = document.documentElement.classList.contains('dark');
