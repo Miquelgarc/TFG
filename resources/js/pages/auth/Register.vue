@@ -11,6 +11,7 @@ import { LoaderCircle } from 'lucide-vue-next';
 const form = useForm({
     name: '',
     email: '',
+    telefono: '',
     password: '',
     password_confirmation: '',
 });
@@ -30,35 +31,39 @@ const submit = () => {
             <div class="grid gap-6">
                 <div class="grid gap-2">
                     <Label for="name">Nom</Label>
-                    <Input id="name" type="text" required autofocus :tabindex="1" autocomplete="name" v-model="form.name" placeholder="Nom complet" />
+                    <Input id="name" type="text"  autofocus :tabindex="1" autocomplete="name" v-model="form.name" placeholder="Nom complet" />
                     <InputError :message="form.errors.name" />
                 </div>
 
                 <div class="grid gap-2">
                     <Label for="email">Email</Label>
-                    <Input id="email" type="email" required :tabindex="2" autocomplete="email" v-model="form.email" placeholder="email@exemple.com" />
+                    <Input id="email" type="email" :tabindex="2" autocomplete="email" v-model="form.email" placeholder="email@exemple.com" />
                     <InputError :message="form.errors.email" />
                 </div>
 
-                <div class="grid gap-2">
+                <!-- <div class="grid gap-2">
+                    <Label for="telefono">Telèfon</Label>
+                    <Input id="telefono" type="telefono" required :tabindex="3" autocomplete="telefono" v-model="form.telefono" placeholder="971614772" />
+                    <InputError :message="form.errors.telefono" />
+                </div> -->
+                <!-- <div class="grid gap-2">
                     <Label for="email">Nom de l'empresa</Label>
                     <Input id="company" type="text" required :tabindex="2" autocomplete="company" v-model="form.email" placeholder="Nom de l'empresa" />
                     <InputError :message="form.errors.email" />
                 </div>
-
-                <div class="grid gap-2">
+ -->
+                <!-- <div class="grid gap-2">
                     <Label for="url">URL del teu lloc web</Label>
                     <Input id="url" type="url" required :tabindex="2" autocomplete="url" v-model="form.email" placeholder="https//exemple.com" />
                     <InputError :message="form.errors.email" />
-                </div>
+                </div> -->
 
                 <div class="grid gap-2">
                     <Label for="password">Contrassenya</Label>
                     <Input
                         id="password"
                         type="password"
-                        required
-                        :tabindex="3"
+                        :tabindex="4"
                         autocomplete="new-password"
                         v-model="form.password"
                         placeholder="Password"
@@ -71,8 +76,7 @@ const submit = () => {
                     <Input
                         id="password_confirmation"
                         type="password"
-                        required
-                        :tabindex="4"
+                        :tabindex="5"
                         autocomplete="new-password"
                         v-model="form.password_confirmation"
                         placeholder="Confirmar contrassenya"
@@ -80,7 +84,7 @@ const submit = () => {
                     <InputError :message="form.errors.password_confirmation" />
                 </div>
 
-                <Button type="submit" class="mt-2 w-full" tabindex="5" :disabled="form.processing">
+                <Button type="submit" class="mt-2 w-full" tabindex="6" :disabled="form.processing">
                     <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
                     Envia
                 </Button>
@@ -88,7 +92,7 @@ const submit = () => {
 
             <div class="text-center text-sm text-muted-foreground">
                 Ja tens un compte?&nbsp;
-                <TextLink :href="route('login')" class="underline underline-offset-4" :tabindex="6">Inicia sessió</TextLink>
+                <TextLink :href="route('login')" class="underline underline-offset-4" :tabindex="7">Inicia sessió</TextLink>
             </div>
         </form>
     </AuthBase>

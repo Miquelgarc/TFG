@@ -18,8 +18,18 @@ class ReservesController extends Controller
         $request->validate([
             'property_id' => 'required|exists:rental_properties,id',
             'check_in_date' => 'required|date|after:yesterday',
-            'check_out_date' => 'required|date|after:start_date',
+            'check_out_date' => 'required|date|after:check_in_date',
+        ], [
+            'property_id.required' => 'La propietat és obligatòria.',
+            'property_id.exists' => 'La propietat seleccionada no existeix.',
+            'check_in_date.required' => 'La data d\'entrada és obligatòria.',
+            'check_in_date.date' => 'La data d\'entrada ha de ser una data vàlida.',
+            'check_in_date.after' => 'La data d\'entrada ha de ser posterior a avui.',
+            'check_out_date.required' => 'La data de sortida és obligatòria.',
+            'check_out_date.date' => 'La data de sortida ha de ser una data vàlida.',
+            'check_out_date.after' => 'La data de sortida ha de ser posterior a la data d\'entrada.',
         ]);
+
 
         $house = Property::findOrFail($request->property_id);
 

@@ -20,18 +20,18 @@ const props = defineProps<{
 const showReservationForm = ref(false)
 const selectedHouse = ref<typeof props.houses[number] | null>(null)
 const showDetails = ref(false)
-
-const form = useForm({
-  property_id: selectedHouse.value?.id || null,
-  check_in_date: '',
-  check_out_date: '',
-  url: window.location.href,
-})
+const form = ref<any>(null)
 
 const openHouseDetails = (house: typeof props.houses[number]) => {
   selectedHouse.value = house
-  form.property_id = house ? house.id : null
   showDetails.value = true
+
+  form.value = useForm({
+    property_id: house?.id ?? null,
+    check_in_date: '',
+    check_out_date: '',
+    url: window.location.href,
+  })
 }
 
 const closeDetails = () => {
@@ -39,18 +39,18 @@ const closeDetails = () => {
   setTimeout(() => {
     selectedHouse.value = null
     showReservationForm.value = false
-    form.reset()
+    form.value.reset()
   }, 300)
 }
 
 const makeReservation = () => {
-  form.post('/reserva', {
+  form.value.post('/reserva', {
     preserveScroll: true,
     onSuccess: () => {
       showReservationForm.value = false
       showDetails.value = false
       selectedHouse.value = null
-      form.reset()
+      form.value.reset()
       alert('Reserva feta correctament!')
     },
     onError: () => {
@@ -62,15 +62,16 @@ const makeReservation = () => {
 
 <template>
   <AppLayout title="Reserves">
+
     <Head title="Reserves" />
 
     <div class="p-6 max-w-7xl mx-auto">
       <h1 class="text-3xl font-extrabold mb-6 text-[#374151] dark:text-white">Cases disponibles per reservar</h1>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div v-for="house in houses.filter(h => h !== null)" :key="house.id"
+        <div v-for="house in houses.filter(h => h !== null)" :key="house!.id"
           class="bg-white dark:bg-[#374151] rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer"
-          @click="openHouseDetails(house)">
+          @click="openHouseDetails(house!)">
           <img :src="house.image_url || 'https://source.unsplash.com/600x400/?house,vacation'" alt="Imatge de la casa"
             class="w-full h-48 object-cover" />
 
@@ -91,10 +92,13 @@ const makeReservation = () => {
 
       <!-- Detall de la casa -->
       <transition name="fade">
-        <div v-if="selectedHouse" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div class="bg-white dark:bg-[#374151] text-gray-800 dark:text-white rounded-2xl w-full max-w-2xl p-6 relative animate-fade transition-opacity duration-300"
-               :class="{ 'opacity-0': !showDetails }">
-            <button class="absolute top-2 right-3 text-gray-400 hover:text-gray-200 text-xl" @click="closeDetails">&times;</button>
+        <div v-if="selectedHouse"
+          class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div
+            class="bg-white dark:bg-[#374151] text-gray-800 dark:text-white rounded-2xl w-full max-w-2xl p-6 relative animate-fade transition-opacity duration-300"
+            :class="{ 'opacity-0': !showDetails }">
+            <button class="absolute top-2 right-3 text-gray-400 hover:text-gray-200 text-xl"
+              @click="closeDetails">&times;</button>
 
             <img :src="selectedHouse.image_url || 'https://source.unsplash.com/800x400/?house'" alt="Imatge de la casa"
               class="w-full h-56 object-cover rounded-lg mb-4" />
@@ -124,19 +128,29 @@ const makeReservation = () => {
               <h3 class="text-xl font-semibold text-[#1E3A8A] dark:text-white">Reserva la teva estada</h3>
               <label>
                 <span class="text-gray-700 dark:text-white mb-2 px-2 py-4">Data d'entrada</span>
-                <input type="date" v-model="form.check_in_date" class="mt-2 mb-4 block w-full border rounded px-3 py-2 dark:text-white dark:fill-white" />
-                <span v-if="form.errors.check_in_date" class="text-red-500">{{ form.errors.check_in_date }}</span>
+                <input type="date" v-model="form.check_in_date"
+                  class="mt-2 mb-1 block w-full border rounded px-3 py-2 dark:text-white dark:fill-white" />
               </label>
+              <span v-if="form.errors.check_in_date" class="text-red-500 text-sm block mt-1">
+                {{ form.errors.check_in_date }}
+              </span>
 
               <label>
                 <span class="text-gray-700 dark:text-white px-2">Data de sortida</span>
-                  <input type="date" v-model="form.check_out_date" class="mt-2 block w-full border rounded px-3 py-2 dark:text-white dark:bg-[#374151]" />
-                <span v-if="form.errors.check_out_date" class="text-red-500">{{ form.errors.check_out_date }}</span>
+                <input type="date" v-model="form.check_out_date"
+                  class="mt-2 block w-full border rounded px-3 py-2 dark:text-white dark:bg-[#374151]" />
               </label>
+              <span v-if="form.errors.check_out_date" class="text-red-500 text-sm block mt-1">
+                {{ form.errors.check_out_date }}
+              </span>
+
 
               <div class="flex justify-end space-x-2 mt-4">
-                <button class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-white px-4 py-2 rounded-lg" @click="showReservationForm = false">Cancel·la</button>
-                <button class="bg-[#1E3A8A] hover:bg-[#1e4d8a] text-white px-4 py-2 rounded" @click="makeReservation">Confirmar
+                <button
+                  class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-white px-4 py-2 rounded-lg"
+                  @click="showReservationForm = false">Cancel·la</button>
+                <button class="bg-[#1E3A8A] hover:bg-[#1e4d8a] text-white px-4 py-2 rounded"
+                  @click="makeReservation">Confirmar
                   reserva</button>
               </div>
             </div>
@@ -153,6 +167,7 @@ const makeReservation = () => {
     opacity: 0;
     transform: scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -167,6 +182,7 @@ const makeReservation = () => {
 .fade-leave-active {
   transition: opacity 0.3s ease;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;

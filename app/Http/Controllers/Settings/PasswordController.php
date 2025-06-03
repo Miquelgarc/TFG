@@ -28,6 +28,12 @@ class PasswordController extends Controller
         $validated = $request->validate([
             'current_password' => ['required', 'current_password'],
             'password' => ['required', Password::defaults(), 'confirmed'],
+        ], [
+            'current_password.required' => 'La contrasenya actual és obligatòria.',
+            'current_password.current_password' => 'La contrasenya actual no és correcta.',
+            'password.required' => 'La nova contrasenya és obligatòria.',
+            'password.confirmed' => 'Les contrasenyes no coincideixen.',
+            'password.min' => 'La contrasenya ha de tenir almenys :min caràcters.',
         ]);
 
         $request->user()->update([

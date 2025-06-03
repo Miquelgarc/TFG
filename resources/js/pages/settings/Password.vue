@@ -13,7 +13,7 @@ import { type BreadcrumbItem } from '@/types';
 
 const breadcrumbItems: BreadcrumbItem[] = [
     {
-        title: 'Configuració de contrassenya',
+        title: 'Configuració de contrasenya',
         href: '/settings/password',
     },
 ];
@@ -52,15 +52,15 @@ const updatePassword = () => {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbItems">
-        <Head title="Reiniciar contrassenya" />
+        <Head title="Reiniciar contrasenya" />
 
         <SettingsLayout>
             <div class="space-y-6">
-                <HeadingSmall title="Canviar contrassenya" description="Assegura't de que utilitzes una contrassenya llarga i robusta per més seguretat" />
+                <HeadingSmall title="Canviar contrasenya" description="Assegura't de que utilitzes una contrasenya llarga i robusta per més seguretat" />
 
                 <form @submit.prevent="updatePassword" class="space-y-6">
                     <div class="grid gap-2">
-                        <Label for="current_password">Contrassenya actual</Label>
+                        <Label for="current_password">Contrasenya actual</Label>
                         <Input
                             id="current_password"
                             ref="currentPasswordInput"
@@ -68,13 +68,13 @@ const updatePassword = () => {
                             type="password"
                             class="mt-1 block w-full"
                             autocomplete="current-password"
-                            placeholder="Contrassenya actual"
+                            placeholder="Contrasenya actual"
                         />
                         <InputError :message="form.errors.current_password" />
                     </div>
 
                     <div class="grid gap-2">
-                        <Label for="password">Nova contrassenya</Label>
+                        <Label for="password">Nova contrasenya</Label>
                         <Input
                             id="password"
                             ref="passwordInput"
@@ -82,20 +82,20 @@ const updatePassword = () => {
                             type="password"
                             class="mt-1 block w-full"
                             autocomplete="new-password"
-                            placeholder="Nova contrassenya"
+                            placeholder="Nova contrasenya"
                         />
                         <InputError :message="form.errors.password" />
                     </div>
 
                     <div class="grid gap-2">
-                        <Label for="password_confirmation">Confirma contrassenya</Label>
+                        <Label for="password_confirmation">Confirma contrasenya</Label>
                         <Input
                             id="password_confirmation"
                             v-model="form.password_confirmation"
                             type="password"
                             class="mt-1 block w-full"
                             autocomplete="new-password"
-                            placeholder="Confirma contrassenya"
+                            placeholder="Confirma contrasenya"
                         />
                         <InputError :message="form.errors.password_confirmation" />
                     </div>
