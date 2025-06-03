@@ -112,8 +112,12 @@ class UserController extends Controller
             $query->whereDate('commissions.generated_at', '<=', $request->date_to);
         }
 
-        $comisions = $query->with('afiliat')->orderByDesc('generated_at')->paginate(12)->withQueryString();
-
+        if ($request->filled('order_by')) {
+            $query->orderBy($request->order_by, $request->order_dir ?? 'asc');
+        } else {
+            $query->orderByDesc('generated_at'); // orden por defecto
+        }
+        $comisions = $query->paginate(10)->appends($request->all());
         return Inertia::render('Comisions', [
             'comisions' => $comisions,
             'filters' => [
@@ -142,9 +146,11 @@ class UserController extends Controller
             $query->where('affiliate_id', $user->id);
         }
 
-
-        $query->join('users', 'affiliate_links.affiliate_id', '=', 'users.id')
+        if ($user->role_name === 'admin') {
+            $query->join('users', 'affiliate_links.affiliate_id', '=', 'users.id')
             ->select('affiliate_links.*', 'users.name as affiliate_name');
+        }
+        
 
         if ($request->search) {
             $query->where('affiliate_links.generated_url', 'like', "%{$request->search}%");

@@ -49,7 +49,7 @@ function updateLinks() {
         page: filters.page,
     }, {
         preserveState: true,
-        replace: true,
+        replace: false,
         onFinish: () => {
             loading.value = false;
         }
@@ -115,7 +115,8 @@ function exportData(format: 'csv' | 'xlsx') {
                 <select v-if="isAdmin" v-model="filters.affiliate_id" @change="updateLinks"
                     class="input px-4 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
                     <option value="">Todos los afiliados</option>
-                    <option v-for="user in (page.props.affiliates as Array<{ id: number|string; name: string }>)" :key="user.id" :value="user.id">
+                    <option v-for="user in (page.props.affiliates as Array<{ id: number | string; name: string }>)"
+                        :key="user.id" :value="user.id">
                         {{ user.name }}
                     </option>
                 </select>
@@ -127,19 +128,18 @@ function exportData(format: 'csv' | 'xlsx') {
                 </button>
             </div>
 
-            <!-- Loader -->
-            <div v-if="loading" class="flex justify-center py-12">
-                <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none"
-                    viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                </svg>
-            </div>
-
-            <!-- Tabla -->
-            <div v-else class="overflow-x-auto rounded-lg shadow-lg">
+            <div class="overflow-x-auto rounded-lg shadow-lg relative">
+                <div v-if="loading"
+                    class="absolute inset-0 bg-white/70 dark:bg-[#0A0A0A]/70 flex items-center justify-center z-10">
+                    <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                    </svg>
+                </div>
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-blue-600 text-white dark:bg-blue-700">
+                    <thead class="bg-chart-3 text-white dark:bg-chart-1">
                         <tr>
                             <th v-if="isAdmin" @click="sortBy('affiliate_name')"
                                 class="px-6 py-3 text-left text-sm font-medium uppercase cursor-pointer hover:underline">
@@ -177,19 +177,19 @@ function exportData(format: 'csv' | 'xlsx') {
                                 <td v-if="isAdmin" class="px-6 py-4 text-gray-900 dark:text-gray-100">
                                     {{ link.affiliate_name }}
                                 </td>
-                                <td class="px-6 py-3 text-gray-900 dark:text-gray-100">
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
                                     {{ link.target_url }}
                                 </td>
-                                <td class="px-6 py-3 text-blue-600 dark:text-blue-400 break-all">
+                                <td class="px-6 py-4 text-blue-600 dark:text-blue-400 break-all">
                                     {{ link.generated_url }}
                                 </td>
-                                <td class="px-6 py-3 text-gray-700 dark:text-gray-200">
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
                                     {{ link.clicks }}
                                 </td>
-                                <td class="px-6 py-3 text-green-600 dark:text-green-400">
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
                                     {{ link.conversions }}
                                 </td>
-                                <td class="px-6 py-3 text-green-600 dark:text-green-400">
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
                                     {{ dayjs(link.created_at).format('DD/MM/YYYY') }}
                                 </td>
                             </tr>

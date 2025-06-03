@@ -33,14 +33,25 @@ class AfiliatController extends Controller
                 ->get();
 
 
-            $comisionesSemanal = Comisions::selectRaw("
-    YEARWEEK(generated_at) as semana,
-    CONCAT('Semana ', WEEK(generated_at), ' - ', YEAR(generated_at)) as semana_nombre,
-    SUM(amount) as total
-")->where('affiliate_id', $user->id)
-                ->groupBy('semana', 'semana_nombre')
+            $comisionesSemanal = DB::table('commissions')
+                ->selectRaw("
+        YEARWEEK(generated_at, 1) AS semana,
+        WEEK(generated_at, 1) AS semana_num,
+        YEAR(generated_at) AS anio,
+        ROUND(SUM(amount), 2) AS total
+    ")
+                ->where('affiliate_id', $user->id)
+                ->groupBy('semana', 'semana_num', 'anio')
                 ->orderBy('semana')
-                ->get();
+                ->get()
+                ->map(function ($item) {
+                    $item->semana_nombre = 'Semana ' . $item->semana_num . ' - ' . $item->anio;
+                    return $item;
+                });
+
+
+
+
 
 
             return Inertia::render('InfoAfiliat', [
