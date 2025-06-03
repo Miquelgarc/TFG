@@ -24,7 +24,7 @@ function changePage(pageNum: number) {
 
 function updateReservations() {
     loading.value = true;
-    router.get(route('reservations.index'), { ...filters }, {
+    router.get(route('reservations'), { ...filters }, {
         preserveState: true,
         replace: false,
         onFinish: () => loading.value = false,

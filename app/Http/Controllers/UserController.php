@@ -147,11 +147,10 @@ class UserController extends Controller
         }
 
         if ($user->role_name === 'admin') {
-            $query->join('users', 'links.affiliate_id', '=', 'users.id')
-                ->select('links.*', 'users.name as affiliate_name');
-        }
-        $query->join('users', 'affiliate_links.affiliate_id', '=', 'users.id')
+            $query->join('users', 'affiliate_links.affiliate_id', '=', 'users.id')
             ->select('affiliate_links.*', 'users.name as affiliate_name');
+        }
+        
 
         if ($request->search) {
             $query->where('affiliate_links.generated_url', 'like', "%{$request->search}%");

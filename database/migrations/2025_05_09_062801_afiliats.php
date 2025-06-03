@@ -27,6 +27,14 @@ return new class extends Migration {
             $table->rememberToken();
             $table->timestamps();
         });
+        Schema::create('affiliate_contracts', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('affiliate_id')->constrained('users')->onDelete('cascade');
+            $table->decimal('commission_percentage', 5, 2)->default(10.00); // 10% por defecto
+            $table->date('starts_at')->nullable();
+            $table->date('ends_at')->nullable();
+            $table->timestamps();
+        });
 
 
         /*         // Taula d'usuaris
