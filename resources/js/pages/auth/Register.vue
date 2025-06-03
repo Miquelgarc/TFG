@@ -125,8 +125,6 @@ const submit = () => {
             <div class="text-center text-sm text-muted-foreground">
                 Ja tens un compte?&nbsp;
                 <TextLink :href="route('login')" class="underline underline-offset-4" :tabindex="7">Inicia sessió</TextLink>
-                <TextLink :href="route('login')" class="underline underline-offset-4" :tabindex="6">Inicia sessió
-                </TextLink>
             </div>
         </form>
     </AuthBase>
