@@ -48,7 +48,9 @@ class RegisteredUserController extends Controller
             'password.min' => 'La contrasenya ha de tenir com a mínim 8 caràcters.',
         ]);
 
-
+        if ((int) $request->captcha !== (int) session('captcha_answer')) {
+            return back()->withErrors(['captcha' => 'Captcha incorrecte. Torna-ho a intentar.']);
+        }
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,

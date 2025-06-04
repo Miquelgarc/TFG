@@ -29,9 +29,15 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->validate([
-            'captcha' => 'required|numeric',
-        ]);
+        $request->validate(
+            [
+                'captcha' => 'required|numeric',
+            ],
+            [
+                'captcha.required' => 'El captcha és obligatori.',
+                'captcha.numeric' => 'El captcha ha de ser un número.',
+            ]
+        );
 
         if ((int) $request->captcha !== (int) session('captcha_answer')) {
             return back()->withErrors(['captcha' => 'Captcha incorrecte. Torna-ho a intentar.']);
@@ -39,8 +45,14 @@ class AuthenticatedSessionController extends Controller
 
         $request->authenticate();
         if (in_array($request->user()->status, ['rejected', 'pending'])) {
-            Auth::guard('web')->logout();
-            return redirect('/');
+
+            if ($request->user()->status === 'rejected') {
+                Auth::guard('web')->logout();
+                return redirect()->intended('/rejectedUser');
+            } else {
+                Auth::guard('web')->logout();
+                return redirect()->intended('/pendingUser');
+            }
         }
         $request->session()->regenerate();
 

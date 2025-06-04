@@ -27,14 +27,25 @@ return new class extends Migration {
             $table->rememberToken();
             $table->timestamps();
         });
+        Schema::create('affiliate_levels', function (Blueprint $table) {
+            $table->id();
+            $table->string('name'); // Básico, Plata, Oro...
+            $table->decimal('commission_percentage', 5, 2);
+            $table->unsignedInteger('min_reservations')->nullable();
+            $table->unsignedInteger('min_clicks')->nullable();
+            $table->decimal('min_total_earnings', 10, 2)->nullable();
+            $table->timestamps();
+        });
+
         Schema::create('affiliate_contracts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('affiliate_id')->constrained('users')->onDelete('cascade');
-            $table->decimal('commission_percentage', 5, 2)->default(10.00); // 10% por defecto
-            $table->date('starts_at')->nullable();
-            $table->date('ends_at')->nullable();
+            $table->foreignId('affiliate_level_id')->constrained('affiliate_levels')->onDelete('cascade');
+            $table->timestamp('starts_at')->useCurrent();
+            $table->timestamp('ends_at')->nullable(); // para mantener historial
             $table->timestamps();
         });
+
 
 
         /*         // Taula d'usuaris
@@ -146,6 +157,8 @@ return new class extends Migration {
         Schema::dropIfExists('commissions');
         Schema::dropIfExists('affiliate_links');
         Schema::dropIfExists('rental_properties');
+        Schema::dropIfExists('affiliate_contracts');
+        Schema::dropIfExists('affiliate_levels');
         Schema::dropIfExists('users');
         Schema::dropIfExists('roles');
     }

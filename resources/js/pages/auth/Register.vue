@@ -41,23 +41,19 @@ const submit = () => {
 <template>
     <AuthBase title="Crear un compte" description="Ompleu el formulari per crear una sol·licitud d'afiliació">
 
-        <Head title="Register" />
+        <Head title="Registrar-se" />
 
         <form @submit.prevent="submit" class="flex flex-col gap-6">
             <div class="grid gap-6">
                 <div class="grid gap-2">
                     <Label for="name">Nom</Label>
                     <Input id="name" type="text"  autofocus :tabindex="1" autocomplete="name" v-model="form.name" placeholder="Nom complet" />
-                    <Input id="name" type="text" required autofocus :tabindex="1" autocomplete="name"
-                        v-model="form.name" placeholder="Nom complet" />
                     <InputError :message="form.errors.name" />
                 </div>
 
                 <div class="grid gap-2">
                     <Label for="email">Email</Label>
                     <Input id="email" type="email" :tabindex="2" autocomplete="email" v-model="form.email" placeholder="email@exemple.com" />
-                    <Input id="email" type="email" required :tabindex="2" autocomplete="email" v-model="form.email"
-                        placeholder="email@exemple.com" />
                     <InputError :message="form.errors.email" />
                 </div>
 
@@ -81,37 +77,33 @@ const submit = () => {
                 </div> -->
 
                 <div class="grid gap-2">
-                    <Label for="password">Contrassenya</Label>
+                    <Label for="password">Contrasenya</Label>
                     <Input
                         id="password"
                         type="password"
-                        :tabindex="4"
+                        :tabindex="3"
                         autocomplete="new-password"
                         v-model="form.password"
-                        placeholder="Password"
+                        placeholder="Contrasenya"
                     />
-                    <Input id="password" type="password" required :tabindex="3" autocomplete="new-password"
-                        v-model="form.password" placeholder="Password" />
                     <InputError :message="form.errors.password" />
                 </div>
 
                 <div class="grid gap-2">
-                    <Label for="password_confirmation">Confirmar contrassenya</Label>
+                    <Label for="password_confirmation">Confirmar contrasenya</Label>
                     <Input
                         id="password_confirmation"
                         type="password"
-                        :tabindex="5"
+                        :tabindex="4"
                         autocomplete="new-password"
                         v-model="form.password_confirmation"
-                        placeholder="Confirmar contrassenya"
+                        placeholder="Confirmar contrasenya"
                     />
-                    <Input id="password_confirmation" type="password" required :tabindex="4" autocomplete="new-password"
-                        v-model="form.password_confirmation" placeholder="Confirmar contrassenya" />
                     <InputError :message="form.errors.password_confirmation" />
                 </div>
                 <div class="grid gap-2">
                     <Label for="captcha">Resol el captcha: {{ captchaQuestion }}</Label>
-                    <Input id="captcha" type="text" required :tabindex="3" v-model="form.captcha"
+                    <Input id="captcha" type="text" required :tabindex="5" v-model="form.captcha"
                         placeholder="Resposta" />
                     <InputError :message="form.errors.captcha" />
                 </div>

@@ -13,6 +13,12 @@ use Inertia\Inertia;
 Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
+Route::get('/pendingUser', function () {
+    return Inertia::render('auth/PendingUser');
+})->name('pendingUser');
+Route::get('/rejectedUser', function () {
+    return Inertia::render('auth/RejectedUser');
+})->name('rejectedUser');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/info-afiliat', [AfiliatController::class, 'index'])->name('infoAfiliat');

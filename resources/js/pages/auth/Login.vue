@@ -56,7 +56,7 @@ const submit = () => {
             <div class="grid gap-6">
                 <div class="grid gap-2">
                     <Label for="email">Email</Label>
-                    <Input id="email" type="email" required autofocus :tabindex="1" autocomplete="email"
+                    <Input id="email" type="email"  autofocus :tabindex="1" autocomplete="email"
                         v-model="form.email" placeholder="email@exemple.com" />
                     <InputError :message="form.errors.email" />
                 </div>
@@ -69,14 +69,14 @@ const submit = () => {
                             No recordes la contrassenya?
                         </TextLink>
                     </div>
-                    <Input id="password" type="password" required :tabindex="2" autocomplete="current-password"
+                    <Input id="password" type="password" :tabindex="2" autocomplete="current-password"
                         v-model="form.password" placeholder="Contrassenya" />
                     <InputError :message="form.errors.password" />
                 </div>
                 
                 <div class="grid gap-2">
                     <Label for="captcha">Resol el captcha: {{ captchaQuestion }}</Label>
-                    <Input id="captcha" type="text" required :tabindex="3" v-model="form.captcha"
+                    <Input id="captcha" type="text" :tabindex="3" v-model="form.captcha"
                         placeholder="Resposta" />
                     <InputError :message="form.errors.captcha" />
                 </div>
