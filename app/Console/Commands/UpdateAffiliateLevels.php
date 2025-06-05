@@ -8,7 +8,7 @@ use App\Models\AffiliateLevel;
 use App\Models\AffiliateContract;
 use App\Models\AffiliateClick;
 use App\Models\Reservation;
-use App\Models\Comisions;
+use App\Models\Commission;
 use Carbon\Carbon;
 
 class UpdateAffiliateLevels extends Command
@@ -19,25 +19,30 @@ class UpdateAffiliateLevels extends Command
     public function handle()
     {
         $this->info("Iniciando actualización de niveles...");
+        \Log::info("🔁 Iniciando actualización de niveles de afiliados...");
 
         $affiliates = User::whereHas('role', fn($q) => $q->where('name', 'afiliado'))->get();
 
         foreach ($affiliates as $affiliate) {
-            $clicks = AffiliateClick::whereHas('affiliateLink', fn($q) =>
+            $clicks = AffiliateClick::whereHas(
+                'affiliateLink',
+                fn($q) =>
                 $q->where('affiliate_id', $affiliate->id)
             )->count();
 
-            $reservations = Reservation::whereHas('affiliateLink', fn($q) =>
+            $reservations = Reservation::whereHas(
+                'affiliateLink',
+                fn($q) =>
                 $q->where('affiliate_id', $affiliate->id)
             )->where('status', 'confirmed')->count();
 
-            $earnings = Comisions::where('affiliate_id', $affiliate->id)->sum('amount');
+            $earnings = Commission::where('affiliate_id', $affiliate->id)->sum('amount');
 
             $level = AffiliateLevel::query()
                 ->where(function ($q) use ($clicks, $reservations, $earnings) {
                     $q->where('min_clicks', '<=', $clicks)
-                      ->orWhere('min_reservations', '<=', $reservations)
-                      ->orWhere('min_total_earnings', '<=', $earnings);
+                        ->orWhere('min_reservations', '<=', $reservations)
+                        ->orWhere('min_total_earnings', '<=', $earnings);
                 })
                 ->orderByDesc('commission_percentage')
                 ->first();
@@ -62,10 +67,15 @@ class UpdateAffiliateLevels extends Command
                     'starts_at' => now(),
                 ]);
 
+                \Log::info("Afiliado ID {$affiliate->id} actualizado al nivel '{$level->name}'");
                 $this->info("Afiliado ID {$affiliate->id} actualizado al nivel '{$level->name}'");
+
+
             }
         }
 
         $this->info("Actualización de niveles completada.");
+        \Log::info(message: "✅ Finalizada la actualización de niveles.");
+
     }
 }

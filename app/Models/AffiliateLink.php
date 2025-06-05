@@ -15,13 +15,20 @@ class AffiliateLink extends Model
     ];
 
 
-    public function affiliateUser()
+    public function affiliate()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'affiliate_id');
     }
+
     public function reservations()
     {
         return $this->hasMany(Reservation::class);
     }
+
+    public function clicks()
+    {
+        return $this->hasMany(AffiliateClick::class);
+    }
+
 
 }

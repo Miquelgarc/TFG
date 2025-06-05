@@ -120,12 +120,38 @@ const breadcrumbs: BreadcrumbItem[] = [
 
         <Head title="Info afiliat" />
 
-        <div class="p-6 space-y-6">
+        <div class="p-4 space-y-6">
             <div>
                 <h1 v-if="user" class="text-2xl font-bold mb-4">{{ user?.company_name }}</h1>
                 <p>{{ user?.name }}</p>
                 <span>URL: <a class="text-blue-600 underline">{{ user?.website_url }}</a></span>
                 <p class="mt-4">Email: {{ user?.email }}</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="p-4 rounded-xl shadow bg-white dark:bg-gray-800">
+                    <h3 class="text-sm text-gray-500 dark:text-gray-300">Nivell d'Afiliat</h3>
+                    <p class="text-xl font-semibold text-gray-900 dark:text-white">{{ page.props.stats.nivel }}</p>
+                </div>
+                <div class="p-4 rounded-xl shadow bg-white dark:bg-gray-800">
+                    <h3 class="text-sm text-gray-500 dark:text-gray-300">% Comisión</h3>
+                    <p class="text-xl font-semibold text-gray-900 dark:text-white">{{ page.props.stats.porcentaje }}%
+                    </p>
+                </div>
+                <div class="p-4 rounded-xl shadow bg-white dark:bg-gray-800">
+                    <h3 class="text-sm text-gray-500 dark:text-gray-300">Total comisiones</h3>
+                    <p class="text-xl font-semibold text-green-600 dark:text-green-400">€{{
+                        page.props.stats.total_comisiones }}</p>
+                </div>
+                <div class="p-4 rounded-xl shadow bg-white dark:bg-gray-800">
+                    <h3 class="text-sm text-gray-500 dark:text-gray-300">Reservas confirmadas</h3>
+                    <p class="text-xl font-semibold text-blue-600 dark:text-blue-400">{{ page.props.stats.reservas }}
+                    </p>
+                </div>
+                <div class="p-4 rounded-xl shadow bg-white dark:bg-gray-800">
+                    <h3 class="text-sm text-gray-500 dark:text-gray-300">Clicks recibidos</h3>
+                    <p class="text-xl font-semibold text-indigo-600 dark:text-indigo-400">{{ page.props.stats.clicks }}
+                    </p>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -150,7 +176,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                                     {{ link.generated_url }}
                                 </a>
                                 <span class="text-gray-500 dark:text-gray-300 text-xs">Reservas: {{ link.total_reservas
-                                }}</span>
+                                    }}</span>
                             </div>
                         </li>
                     </ul>

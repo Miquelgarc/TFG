@@ -18,8 +18,11 @@ const filters = reactive({
     affiliate_id: page.props.filtersCommission?.affiliate_id ?? '',
     order_by: page.props.filtersCommission?.order_by ?? '',
     order_dir: page.props.filtersCommission?.order_dir ?? '',
+    status: page.props.filtersCommission?.status ?? '',
+    is_paid: page.props.filtersCommission?.is_paid ?? '',
     page: page.props.filtersCommission?.page ?? 1,
 });
+
 
 function changePage(pageNum: number) {
     filters.page = pageNum;
@@ -35,6 +38,8 @@ function updateComisions() {
         affiliate_id: filters.affiliate_id,
         order_by: filters.order_by,
         order_dir: filters.order_dir,
+        status: filters.status,
+        is_paid: filters.is_paid,
         page: filters.page,
     }, {
         preserveState: true,
@@ -84,6 +89,15 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/afiliats/comisions',
     },
 ];
+const statusColor = (status: string) => {
+    switch (status) {
+        case 'pending': return 'text-yellow-500';
+        case 'approved': return 'text-blue-500';
+        case 'paid': return 'text-green-600';
+        default: return 'text-gray-500';
+    }
+}
+
 </script>
 
 
@@ -101,6 +115,15 @@ const breadcrumbs: BreadcrumbItem[] = [
                     class="input px-4 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
                 <input type="date" v-model="filters.date_to" @change="updateComisions"
                     class="input px-4 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
+                <!-- Filtro por estado -->
+                <select v-model="filters.status" @change="updateComisions"
+                    class="input px-4 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                    <option value="">Tots els estats</option>
+                    <option value="pending">Pendent</option>
+                    <option value="approved">Aprovat</option>
+                    <option value="paid">Pagat</option>
+                </select>
+
 
                 <!-- Filtro por afiliado (solo admin) -->
                 <select v-if="isAdmin" v-model="filters.affiliate_id" @change="updateComisions"
@@ -159,6 +182,13 @@ const breadcrumbs: BreadcrumbItem[] = [
                                         {{ filters.order_dir === 'asc' ? '↑' : '↓' }}
                                     </span>
                                 </th>
+                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Estat</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Pagat el
+                                </th>
+                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Reserva
+                                </th>
+                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Link</th>
+
                             </tr>
                         </thead>
                         <transition-group name="fade" tag="tbody">
@@ -172,12 +202,40 @@ const breadcrumbs: BreadcrumbItem[] = [
                                     <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
                                         {{ c.description }}
                                     </td>
+
                                     <td class="px-6 py-4 text-chart-2 dark:text-chart-2 dark:font-bold">
                                         €{{ Number(c.amount).toFixed(2) }}
                                     </td>
                                     <td class="px-6 py-4 text-gray-600 dark:text-gray-300">
                                         {{ new Date(c.generated_at).toLocaleDateString() }}
                                     </td>
+                                    <td class="px-6 py-4 text-gray-700 dark:text-gray-300">
+                                        <span :class="{
+                                            'text-yellow-500': c.status === 'pending',
+                                            'text-blue-500': c.status === 'approved',
+                                            'text-green-600': c.status === 'paid'
+                                        }">{{ c.status }}</span>
+                                    </td>
+
+                                    <td class="px-6 py-4 text-gray-500 dark:text-gray-400">
+                                        {{ c.paid_at ? new Date(c.paid_at).toLocaleDateString() : '—' }}
+                                    </td>
+
+                                    <td class="px-6 py-4">
+                                        <span v-if="c.reservation_id" class="text-sm text-blue-700 dark:text-blue-300">
+                                            #{{ c.reservation_id }}
+                                        </span>
+                                        <span v-else>—</span>
+                                    </td>
+
+                                    <td class="px-6 py-4">
+                                        <a v-if="c.affiliate_link_url" :href="c.affiliate_link_url" target="_blank"
+                                            class="text-blue-600 dark:text-blue-300 underline truncate block max-w-[180px]">
+                                            {{ c.affiliate_link_url }}
+                                        </a>
+                                        <span v-else>—</span>
+                                    </td>
+
                                 </tr>
                             </template>
                             <template v-else>
@@ -230,13 +288,32 @@ const breadcrumbs: BreadcrumbItem[] = [
 
                         <div class="text-sm text-gray-500 dark:text-gray-400">Descripció</div>
                         <div class="font-medium text-gray-900 dark:text-gray-100">{{ c.description }}</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">Estat</div>
+                        <div class="font-medium" :class="statusColor(c.status)">{{ c.status }}</div>
+
+                        <div class="text-sm text-gray-500 dark:text-gray-400">Pagat</div>
+                        <div class="text-gray-700 dark:text-gray-300">
+                            {{ c.paid_at ? new Date(c.paid_at).toLocaleDateString() : '—' }}
+                        </div>
+
+                        <div class="text-sm text-gray-500 dark:text-gray-400">Reserva</div>
+                        <div class="text-gray-700 dark:text-gray-300">
+                            #{{ c.reservation_id ?? '—' }}
+                        </div>
+
+                        <div class="text-sm text-gray-500 dark:text-gray-400">Link</div>
+                        <a v-if="c.affiliate_link_url" :href="c.affiliate_link_url" target="_blank"
+                            class="text-blue-600 dark:text-blue-300 underline truncate">
+                            {{ c.affiliate_link_url }}
+                        </a>
+                        <span v-else>—</span>
 
                         <div class="text-sm text-gray-500 dark:text-gray-400">Quantitat</div>
                         <div class="font-bold text-chart-2">€{{ Number(c.amount).toFixed(2) }}</div>
 
                         <div class="text-sm text-gray-500 dark:text-gray-400">Data</div>
                         <div class="text-gray-700 dark:text-gray-300">{{ new Date(c.generated_at).toLocaleDateString()
-                        }}</div>
+                            }}</div>
                     </div>
                 </template>
                 <template v-else>

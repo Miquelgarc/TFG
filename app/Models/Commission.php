@@ -4,24 +4,31 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Comisions extends Model
+class Commission extends Model
 {
-    protected $table = 'commissions';
     protected $fillable = [
         'affiliate_id',
+        'reservation_id',
         'amount',
         'description',
         'generated_at',
+        'status',
+        'is_paid',
+        'paid_at',
     ];
 
-
-    public function afiliat()
+    public function affiliate()
     {
-        return $this->belongsTo(User::class, 'afiliat_id');
+        return $this->belongsTo(User::class, 'affiliate_id');
     }
+
+    public function reservation()
+    {
+        return $this->belongsTo(Reservation::class);
+    }
+
     public function getAmountAttribute($value)
     {
         return number_format((float) $value, 2, '.', '');
     }
-
 }

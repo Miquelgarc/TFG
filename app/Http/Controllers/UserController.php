@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Comisions;
+use App\Models\Commission;
 use App\Models\Link;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use App\Exports\LinksExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\DB;
 
 
 class UserController extends Controller
@@ -25,9 +26,9 @@ class UserController extends Controller
             abort(403, 'No tienes permiso para ver esta página.');
         }
 
-        $query = User::query()->where('role_id', 2);
+        $query = User::with(['currentAffiliateContract.level', 'commissions', 'affiliateLinks.reservations'])
+            ->where('role_id', 2);
 
-        // Filtro por búsqueda
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -36,13 +37,28 @@ class UserController extends Controller
             });
         }
 
-        // Filtro por estado, evitando aplicar si es null o string vacío
         $status = $request->input('status');
         if (!is_null($status) && $status !== '') {
             $query->where('status', $status);
         }
 
         $afiliates = $query->paginate(10)->withQueryString();
+
+        // Añadir stats para cada afiliado
+        $afiliates->getCollection()->transform(function ($user) {
+            $confirmedReservations = $user->affiliateLinks->flatMap->reservations->where('status', 'confirmed');
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'company_name' => $user->company_name,
+                'status' => $user->status,
+                'level_name' => $user->currentAffiliateContract?->level?->name ?? 'Sin contrato',
+                'commission_percentage' => $user->currentAffiliateContract?->level?->commission_percentage ?? 0,
+                'total_reservations' => $confirmedReservations->count(),
+                'total_earned' => number_format($user->commissions->sum('amount'), 2),
+            ];
+        });
 
         return Inertia::render('Afiliates', [
             'afiliates' => $afiliates,
@@ -52,6 +68,7 @@ class UserController extends Controller
             ],
         ]);
     }
+
 
 
     public function destroy($id)
@@ -84,14 +101,27 @@ class UserController extends Controller
             abort(403, 'No tienes permiso para ver esta página.');
         }
 
-        $query = Comisions::query();
+        $query = Commission::query();
 
         if ($user->role_name === 'affiliate') {
-            $query->where('affiliate_id', $user->id);
+            $query->leftJoin('reservations', 'commissions.reservation_id', '=', 'reservations.id')
+                ->leftJoin('affiliate_links', 'reservations.affiliate_link_id', '=', 'affiliate_links.id')
+                ->select([
+                    'commissions.*',
+                    'reservations.id as reservation_id',
+                    'affiliate_links.generated_url as affiliate_link_url',
+                ]);
         }
         if ($user->role_name === 'admin') {
             $query->join('users', 'commissions.affiliate_id', '=', 'users.id')
-                ->select('commissions.*', 'users.name as affiliate_name');
+                ->leftJoin('reservations', 'commissions.reservation_id', '=', 'reservations.id')
+                ->leftJoin('affiliate_links', 'reservations.affiliate_link_id', '=', 'affiliate_links.id')
+                ->select([
+                    'commissions.*',
+                    'users.name as affiliate_name',
+                    'reservations.id as reservation_id',
+                    'affiliate_links.generated_url as affiliate_link_url',
+                ]);
         }
 
 
@@ -117,12 +147,22 @@ class UserController extends Controller
         } else {
             $query->orderByDesc('generated_at'); // orden por defecto
         }
+        if ($request->filled('status')) {
+            $query->where('commissions.status', $request->status);
+        }
+
         $comisions = $query->paginate(10)->appends($request->all());
         return Inertia::render('Comisions', [
             'comisions' => $comisions,
             'filters' => [
                 'search' => $request->search,
-                'date' => $request->date,
+                'date_from' => $request->date_from,
+                'date_to' => $request->date_to,
+                'affiliate_id' => $request->affiliate_id,
+                'order_by' => $request->order_by,
+                'order_dir' => $request->order_dir,
+                'status' => $request->status,
+                'is_paid' => $request->is_paid,
                 'page' => $request->page ?? 1,
             ],
             'pagination' => [
@@ -148,9 +188,9 @@ class UserController extends Controller
 
         if ($user->role_name === 'admin') {
             $query->join('users', 'affiliate_links.affiliate_id', '=', 'users.id')
-            ->select('affiliate_links.*', 'users.name as affiliate_name');
+                ->select('affiliate_links.*', 'users.name as affiliate_name');
         }
-        
+
 
         if ($request->search) {
             $query->where('affiliate_links.generated_url', 'like', "%{$request->search}%");
@@ -185,7 +225,7 @@ class UserController extends Controller
     }
     public function exportComisions(Request $request)
     {
-        $query = Comisions::query();
+        $query = Commission::query();
 
         if ($request->search) {
             $query->where('description', 'like', "%{$request->search}%");

@@ -68,7 +68,28 @@ class User extends Authenticatable
 
     public function affiliateLinks()
     {
-        return $this->hasMany(AffiliateLink::class);
+        return $this->hasMany(AffiliateLink::class, 'affiliate_id');
+    }
+
+
+    public function affiliateContracts()
+    {
+        return $this->hasMany(AffiliateContract::class, 'affiliate_id');
+    }
+
+    public function currentAffiliateContract()
+    {
+        return $this->hasOne(AffiliateContract::class, 'affiliate_id')->latestOfMany();
+    }
+
+    public function currentAffiliateLevel()
+    {
+        return $this->currentAffiliateContract?->level;
+    }
+
+    public function commissions()
+    {
+        return $this->hasMany(Commission::class, 'affiliate_id');
     }
 
 }

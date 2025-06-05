@@ -7,7 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class Reservation extends Model
 {
     protected $fillable = [
-        'property_id', 'user_id', 'affiliate_link_id', 'check_in_date', 'check_out_date', 'total_price', 'status', 'created_at'
+        'property_id',
+        'user_id',
+        'affiliate_link_id',
+        'check_in_date',
+        'check_out_date',
+        'total_price',
+        'status',
+        'created_at'
     ];
 
     public function property()
@@ -28,12 +35,16 @@ class Reservation extends Model
     public function affiliateUser()
     {
         return $this->hasOneThrough(
-            User::class,          // Final model (User)
-            AffiliateLink::class, // Intermediate model
-            'id',                 // Foreign key on AffiliateLink table...
-            'id',                 // Foreign key on User table...
-            'affiliate_link_id',  // Local key on Reservation
-            'user_id'             // Local key on AffiliateLink
+            User::class,
+            AffiliateLink::class,
+            'id',
+            'id',
+            'affiliate_link_id',
+            'user_id'
         );
+    }
+    public function commissions()
+    {
+        return $this->hasMany(Commission::class);
     }
 }

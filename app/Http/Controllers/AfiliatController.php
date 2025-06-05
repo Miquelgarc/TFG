@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\User;
 use App\Models\Role;
-use App\Models\Comisions;
+use App\Models\Commission;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 
@@ -48,10 +48,21 @@ class AfiliatController extends Controller
                     $item->semana_nombre = 'Semana ' . $item->semana_num . ' - ' . $item->anio;
                     return $item;
                 });
+            $totalComisiones = Commission::where('affiliate_id', $user->id)->sum('amount');
 
+            $totalClicks = DB::table('affiliate_clicks')
+                ->join('affiliate_links', 'affiliate_clicks.affiliate_link_id', '=', 'affiliate_links.id')
+                ->where('affiliate_links.affiliate_id', $user->id)
+                ->count();
 
+            $totalReservas = DB::table('reservations')
+                ->join('affiliate_links', 'reservations.affiliate_link_id', '=', 'affiliate_links.id')
+                ->where('affiliate_links.affiliate_id', $user->id)
+                ->where('reservations.status', 'confirmed')
+                ->count();
 
-
+            $nivel = $user->currentAffiliateContract?->level?->name ?? 'Sense nivell';
+            $porcentaje = $user->currentAffiliateContract?->level?->commission_percentage ?? 0;
 
 
             return Inertia::render('InfoAfiliat', [
@@ -60,6 +71,13 @@ class AfiliatController extends Controller
                 ],
                 'comisionesSemanales' => $comisionesSemanal,
                 'linksTop' => $topAffiliateLinks,
+                'stats' => [
+                    'nivel' => $nivel,
+                    'porcentaje' => $porcentaje,
+                    'clicks' => $totalClicks,
+                    'reservas' => $totalReservas,
+                    'total_comisiones' => number_format($totalComisiones, 2),
+                ],
             ]);
         }
     }
