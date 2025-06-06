@@ -26,7 +26,19 @@ class Link extends Model
         return url($value);
     }
 
-    public function affiliate() {
+    public function affiliate()
+    {
         return $this->belongsTo(User::class, 'affiliate_id');
     }
+
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class, 'affiliate_link_id');
+    }
+    
+    public function property()
+    {
+        return $this->belongsTo(Property::class, 'property_id');
+    }
+
 }

@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Models\User;
-use App\Models\Comisions;
+use App\Models\Commission;
 use App\Models\Link;
 
 class ReservesController extends Controller
@@ -38,7 +38,7 @@ class ReservesController extends Controller
 
         if ($request->affiliate_link_id) {
             $link = Link::where('generated_url', $request->url)->firstOrFail();
-            $comision = Comisions::where('affiliate_id', $link->affiliate_id)->first();
+            $comision = Commission::where('affiliate_id', $link->affiliate_id)->first();
             if ($comision) {
                 $total += $comision->amount;
             }

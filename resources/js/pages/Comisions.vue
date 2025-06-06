@@ -81,7 +81,7 @@ function exportData(format: 'csv' | 'xlsx') {
         export: format,
     };
     const query = new URLSearchParams(params as any).toString();
-    window.open(route('links.export') + '?' + query, '_blank');
+    window.open(route('comisions.export') + '?' + query, '_blank');
 }
 const breadcrumbs: BreadcrumbItem[] = [
     {

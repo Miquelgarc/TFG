@@ -21,7 +21,7 @@ const loading = ref(false);
     order_dir: page.props.filtersLinks?.order_dir ?? '',
     page: page.props.filtersLinks?.page ?? 1,
 }); */
-
+console.log(filteredLinks.value)
 const filters = reactive({
     search: page.props.filtersLinks?.search ?? '',
     date_from: page.props.filtersLinks?.date_from ?? '',
@@ -145,7 +145,7 @@ function exportData(format: 'csv' | 'xlsx') {
                                 class="px-6 py-3 text-left text-sm font-medium uppercase cursor-pointer hover:underline">
                                 Nom Afiliat
                             </th>
-                            <th class="px-6 py-3 text-left text-sm font-medium uppercase">URL pare</th>
+                            <th class="px-6 py-3 text-left text-sm font-medium uppercase">Propietat</th>
                             <th class="px-6 py-3 text-left text-sm font-medium uppercase">URL generada</th>
                             <th @click="sortBy('clicks')"
                                 class="px-6 py-3 text-left text-sm font-medium uppercase cursor-pointer hover:underline">
@@ -161,6 +161,12 @@ function exportData(format: 'csv' | 'xlsx') {
                                     {{ filters.order_dir === 'asc' ? '↑' : '↓' }}
                                 </span>
                             </th>
+                            <th @click="sortBy('total_earned')"
+                                class="px-6 py-3 text-left text-sm font-medium uppercase cursor-pointer hover:underline">
+                                Ingresos</th>
+                                <span v-if="filters.order_by === 'total_earned'">
+                                    {{ filters.order_dir === 'asc' ? '↑' : '↓' }}
+                                </span>
                             <th @click="sortBy('created_at')"
                                 class="px-6 py-3 text-left text-sm font-medium uppercase cursor-pointer hover:underline">
                                 Data Creació
@@ -178,7 +184,7 @@ function exportData(format: 'csv' | 'xlsx') {
                                     {{ link.affiliate_name }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
-                                    {{ link.target_url }}
+                                    {{ link.property_title ?? '—' }}
                                 </td>
                                 <td class="px-6 py-4 text-blue-600 dark:text-blue-400 break-all">
                                     {{ link.generated_url }}
@@ -188,6 +194,9 @@ function exportData(format: 'csv' | 'xlsx') {
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
                                     {{ link.conversions }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-chart-2">
+                                    {{ link.total_earned }} €
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
                                     {{ dayjs(link.created_at).format('DD/MM/YYYY') }}

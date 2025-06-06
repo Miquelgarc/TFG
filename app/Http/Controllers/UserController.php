@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Exports\LinksExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 
 class UserController extends Controller
@@ -180,7 +182,15 @@ class UserController extends Controller
             abort(403, 'No tienes permiso para ver esta página.');
         }
 
-        $query = Link::query();
+        $query = Link::query()
+            ->join('rental_properties as property', 'affiliate_links.property_id', '=', 'property.id')
+            ->select('affiliate_links.*', 'property.title as property_title')
+            ->selectSub(function ($q) {
+                $q->from('commissions')
+                    ->join('reservations', 'commissions.reservation_id', '=', 'reservations.id')
+                    ->whereColumn('reservations.affiliate_link_id', 'affiliate_links.id')
+                    ->selectRaw('SUM(commissions.amount)');
+            }, 'total_earned');
 
         if ($user->role_name === 'affiliate') {
             $query->where('affiliate_id', $user->id);
@@ -218,46 +228,117 @@ class UserController extends Controller
         $links = $query->paginate(10)->appends($request->all());
 
         return Inertia::render('Links', [
-            'links' => $links,
+            'links' => $links->through(fn($link) => [
+                'id' => $link->id,
+                'property_title' => $link->property_title,
+                'generated_url' => $link->generated_url,
+                'clicks' => $link->clicks,
+                'conversions' => $link->conversions,
+                'created_at' => $link->created_at,
+                'affiliate_name' => $link->affiliate?->name,
+                'total_earned' => number_format($link->total_earned ?? 0, 2),
+            ]),
             'filtersLink' => $request->only(['search', 'date', 'order_by', 'order_dir', 'page']),
         ]);
 
     }
     public function exportComisions(Request $request)
     {
+        $user = Auth::user();
+        if (!$user) {
+            abort(403);
+        }
+
         $query = Commission::query();
 
-        if ($request->search) {
-            $query->where('description', 'like', "%{$request->search}%");
+        if ($user->role_name === 'affiliate') {
+            $query->where('affiliate_id', $user->id);
         }
 
-        if ($request->date) {
-            $query->whereDate('generated_at', $request->date);
+        if ($user->role_name === 'admin') {
+            $query->join('users', 'commissions.affiliate_id', '=', 'users.id')
+                ->leftJoin('reservations', 'commissions.reservation_id', '=', 'reservations.id')
+                ->leftJoin('affiliate_links', 'reservations.affiliate_link_id', '=', 'affiliate_links.id')
+                ->select([
+                    'commissions.*',
+                    'users.name as affiliate_name',
+                    'reservations.id as reservation_id',
+                    'affiliate_links.generated_url as affiliate_link_url',
+                ]);
         }
 
-        if (Auth::user()->role_name === 'affiliate') {
-            $query->where('affiliate_id', Auth::id());
-        }
-
-        $comisions = $query->with('afiliat')->get();
-
-        if ($request->export === 'csv') {
-            return response()->streamDownload(function () use ($comisions) {
-                $handle = fopen('php://output', 'w');
-                fputcsv($handle, ['Afiliado', 'Descripción', 'Importe', 'Fecha']);
-                foreach ($comisions as $comision) {
-                    fputcsv($handle, [
-                        $comision->afiliat->name ?? '',
-                        $comision->description,
-                        number_format($comision->amount, 2, ',', '.'),
-                        $comision->generated_at->format('d/m/Y'),
-                    ]);
+        // Filtros reutilizados
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request, $user) {
+                $q->where('commissions.description', 'like', '%' . $request->search . '%');
+                if ($user->role_name === 'admin') {
+                    $q->orWhere('users.name', 'like', '%' . $request->search . '%');
                 }
-                fclose($handle);
-            }, 'comisions.csv');
+            });
         }
 
-        abort(400, 'Formato no válido');
+        if ($request->filled('date_from')) {
+            $query->whereDate('commissions.generated_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('commissions.generated_at', '<=', $request->date_to);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('commissions.status', $request->status);
+        }
+
+        if ($request->filled('is_paid')) {
+            $query->where('commissions.is_paid', $request->is_paid);
+        }
+
+        if ($request->filled('affiliate_id') && $user->role_name === 'admin') {
+            $query->where('commissions.affiliate_id', $request->affiliate_id);
+        }
+
+        $filename = 'comisiones_' . now()->format('Ymd_His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ];
+
+        $columns = [
+            'affiliate_name' => 'Afiliado',
+            'description' => 'Descripción',
+            'amount' => 'Cantidad (€)',
+            'status' => 'Estado',
+            'is_paid' => 'Pagado',
+            'paid_at' => 'Fecha de pago',
+            'generated_at' => 'Fecha generada',
+            'reservation_id' => 'Reserva',
+            'affiliate_link_url' => 'Link afiliado',
+        ];
+
+        return Response::stream(function () use ($query, $columns) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, array_values($columns));
+
+            $query->chunk(100, function ($coms) use ($handle, $columns) {
+                foreach ($coms as $row) {
+                    $data = [];
+                    foreach (array_keys($columns) as $key) {
+                        $value = $row->{$key} ?? '—';
+                        if ($key === 'is_paid') {
+                            $value = $row->is_paid ? 'Sí' : 'No';
+                        }
+                        if ($key === 'amount') {
+                            $value = number_format($row->amount, 2);
+                        }
+                        $data[] = $value;
+                    }
+                    fputcsv($handle, $data);
+                }
+            });
+
+            fclose($handle);
+        }, 200, $headers);
 
     }
     public function exportLink(Request $request)

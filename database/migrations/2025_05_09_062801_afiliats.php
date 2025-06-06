@@ -83,6 +83,7 @@ return new class extends Migration {
         // Taula d'enllaços d'afiliats
         Schema::create('affiliate_links', function (Blueprint $table) {
             $table->id();
+            $table->string('name')->nullable()->after('generated_url'); // Nom descriptiu del link
             $table->foreignId('affiliate_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('property_id')->constrained('rental_properties')->onDelete('cascade');
             $table->string('target_url');
