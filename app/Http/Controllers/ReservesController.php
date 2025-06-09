@@ -35,12 +35,16 @@ class ReservesController extends Controller
 
         $nits = \Carbon\Carbon::parse($request->check_in_date)->diffInDays($request->check_out_date);
         $total = $nits * $house->price_per_night;
+        $affiliateLink = null;
+        $commissionAmount = 0;
 
-        if ($request->affiliate_link_id) {
-            $link = Link::where('generated_url', $request->url)->firstOrFail();
-            $comision = Commission::where('affiliate_id', $link->affiliate_id)->first();
-            if ($comision) {
-                $total += $comision->amount;
+        if ($request->filled('affiliate_link_id')) {
+            $affiliateLink = Link::with('affiliate.currentAffiliateContract.level')
+                ->find($request->affiliate_link_id);
+
+            if ($affiliateLink && $affiliateLink->affiliate && $affiliateLink->affiliate->currentAffiliateContract) {
+                $percentage = $affiliateLink->affiliate->currentAffiliateContract->level->commission_percentage ?? 0;
+                $commissionAmount = round(($total * $percentage) / 100, 2);
             }
         }
 
@@ -54,6 +58,17 @@ class ReservesController extends Controller
             'status' => 'pending',
         ]);
 
+        if ($affiliateLink && $commissionAmount > 0) {
+            Commission::create([
+                'affiliate_id' => $affiliateLink->affiliate_id,
+                'reservation_id' => $reservation->id,
+                'amount' => $commissionAmount,
+                'description' => 'Comisión por reserva de propiedad #' . $house->id,
+                'generated_at' => now(),
+                'status' => 'pending',
+                'is_paid' => false,
+            ]);
+        }
         return redirect()->route('reservations.index', [
             'message' => 'Reservation created successfully',
             'reservation' => $reservation,
@@ -73,7 +88,7 @@ class ReservesController extends Controller
         $query = Reservation::query()->with([
             'property',
             'user',
-            'affiliateLink.affiliateUser' // el afiliado
+            'affiliateLink.affiliate' // el afiliado
         ]);
 
         // FILTRO POR TIPO DE USUARIO

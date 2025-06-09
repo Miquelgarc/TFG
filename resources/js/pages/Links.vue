@@ -121,7 +121,10 @@ function exportData(format: 'csv' | 'xlsx') {
                     </option>
                 </select>
 
-
+                <button @click="router.visit(route('links.create'))"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">
+                    Generar nuevo link
+                </button>
                 <button @click="resetFilters"
                     class="btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition">
                     Reset
@@ -164,9 +167,9 @@ function exportData(format: 'csv' | 'xlsx') {
                             <th @click="sortBy('total_earned')"
                                 class="px-6 py-3 text-left text-sm font-medium uppercase cursor-pointer hover:underline">
                                 Ingresos</th>
-                                <span v-if="filters.order_by === 'total_earned'">
-                                    {{ filters.order_dir === 'asc' ? '↑' : '↓' }}
-                                </span>
+                            <span v-if="filters.order_by === 'total_earned'">
+                                {{ filters.order_dir === 'asc' ? '↑' : '↓' }}
+                            </span>
                             <th @click="sortBy('created_at')"
                                 class="px-6 py-3 text-left text-sm font-medium uppercase cursor-pointer hover:underline">
                                 Data Creació

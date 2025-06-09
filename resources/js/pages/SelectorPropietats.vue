@@ -35,7 +35,7 @@ const closeForm = () => {
 };
 
 const createLink = () => {
-  form.value.post('/affiliate-links', {
+  form.value.post('/afiliats/links', {
     preserveScroll: true,
     onSuccess: () => {
       alert('Link generado exitosamente');
@@ -54,7 +54,7 @@ const createLink = () => {
 
     <div class="p-6 max-w-7xl mx-auto">
       <h1 class="text-3xl font-extrabold mb-6 text-gray-800 dark:text-white">
-        Selecciona una propiedad para generar un link
+        Selecciona una propiedtat per generar un link d'afiliat
       </h1>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -77,7 +77,7 @@ const createLink = () => {
             </p>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">📍 {{ house.location }}</p>
             <p class="text-lg font-semibold text-blue-500 mt-2">
-              €{{ house.price_per_night }} / noche
+              €{{ house.price_per_night }} / nit
             </p>
           </div>
         </div>
@@ -100,11 +100,11 @@ const createLink = () => {
             </button>
 
             <h2 class="text-xl font-bold mb-4">
-              Crear link para: {{ selectedHouse?.title }}
+              Crear link per: {{ selectedHouse?.title }}
             </h2>
 
             <label class="block mb-4">
-              <span class="text-gray-700 dark:text-white">Nombre del Link (opcional)</span>
+              <span class="text-gray-700 dark:text-white">Nom del Link</span>
               <input
                 v-model="form.name"
                 type="text"

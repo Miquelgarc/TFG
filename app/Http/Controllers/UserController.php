@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Commission;
 use App\Models\Link;
+use App\Models\AffiliateLink;
+use App\Models\Property;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +15,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Support\Str;
 
 
 class UserController extends Controller
@@ -198,7 +201,7 @@ class UserController extends Controller
 
         if ($user->role_name === 'admin') {
             $query->join('users', 'affiliate_links.affiliate_id', '=', 'users.id')
-                ->select('affiliate_links.*', 'users.name as affiliate_name');
+                ->addSelect('affiliate_links.*', 'users.name as affiliate_name');
         }
 
 
@@ -382,6 +385,54 @@ class UserController extends Controller
         }
 
         abort(400, 'Formato no válido');
+    }
+
+    public function createLink()
+    {
+        $user = Auth::user();
+        if (!$user || $user->role_name !== 'affiliate') {
+            abort(403, 'No tienes permiso para crear enlaces.');
+        }
+
+        $properties = Property::all();
+
+        return Inertia::render('SelectorPropietats', [
+            'houses' => $properties,
+        ]);
+    }
+
+    public function storeLink(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user || $user->role_name !== 'affiliate') {
+            abort(403, 'No tienes permiso para realizar esta acción.');
+        }
+
+        $validated = $request->validate([
+            'property_id' => 'required|exists:rental_properties,id',
+            'name' => 'nullable|string|max:100',
+        ]);
+
+        // Obtener la propiedad para generar la URL base
+        $property = Property::findOrFail($validated['property_id']);
+
+        // Crear un token único o hash para el link
+        $token = Str::random(10);
+
+        $generatedUrl = url("/property/{$property->id}?ref={$user->id}-{$token}");
+
+        $link = Link::create([
+            'affiliate_id' => $user->id,
+            'property_id' => $property->id,
+            'target_url' => url("/property/{$property->id}"),
+            'generated_url' => $generatedUrl,
+            'clicks' => 0,
+            'conversions' => 0,
+            'name' => $validated['name'] ?? null,
+        ]);
+
+        return redirect()->route('links')->with('success', 'Enlace de afiliado creado correctamente.');
     }
 
 }

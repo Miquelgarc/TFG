@@ -9,6 +9,7 @@ class Link extends Model
     protected $table = 'affiliate_links';
     protected $fillable = [
         'affiliate_id',
+        'property_id',
         'target_url',
         'generated_url',
         'clicks',
@@ -39,6 +40,11 @@ class Link extends Model
     public function property()
     {
         return $this->belongsTo(Property::class, 'property_id');
+    }
+
+    public function clicks()
+    {
+        return $this->hasMany(AffiliateClick::class);
     }
 
 }

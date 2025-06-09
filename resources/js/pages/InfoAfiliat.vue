@@ -122,10 +122,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 
         <div class="p-4 space-y-6">
             <div>
-                <h1 v-if="user" class="text-2xl font-bold mb-4">{{ user?.company_name }}</h1>
-                <p>{{ user?.name }}</p>
-                <span>URL: <a class="text-blue-600 underline">{{ user?.website_url }}</a></span>
-                <p class="mt-4">Email: {{ user?.email }}</p>
+                <h1 v-if="user" class="text-2xl font-bold mb-4">{{ user?.name }}</h1>
+                <p class="text-gray-600 dark:text-gray-300">Benvingut a la teva àrea d'afiliat!</p>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div class="p-4 rounded-xl shadow bg-white dark:bg-gray-800">

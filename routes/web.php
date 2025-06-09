@@ -5,6 +5,7 @@ use App\Http\Controllers\ReservesController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AffiliateLinkController;
 use App\Http\Controllers\HouseController;
+use App\Http\Controllers\PropertyController;
 
 use Database\Seeders\UsersTableSeeder;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +20,9 @@ Route::get('/pendingUser', function () {
 Route::get('/rejectedUser', function () {
     return Inertia::render('auth/RejectedUser');
 })->name('rejectedUser');
+Route::get('/property/{id}', [PropertyController::class, 'show'])->name('property.show');
+
+Route::post('/reserva', [ReservesController::class, 'store'])->name('reservations.store');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/info-afiliat', [AfiliatController::class, 'index'])->name('infoAfiliat');
@@ -33,16 +37,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/afiliats/comisions/export', [UserController::class, 'exportComisions'])->name('comisions.export');
     Route::get('/afiliats/links', [UserController::class, 'Links'])->name('links');
-
+    Route::get('/afiliats/links/create', [UserController::class, 'createLink'])->name('links.create');
+    Route::post('/afiliats/links', [UserController::class, 'storeLink'])->name('links.store');
     Route::get('/afiliats/links/export', [UserController::class, 'exportLink'])->name('links.export');
 
     Route::get('/houses', [HouseController::class, 'indexProperties'])->name('houses');
 
     Route::get('/reserves', [ReservesController::class, 'index'])->name('reservations');
-    
+
     Route::get('/reserva', [ReservesController::class, 'indexProperties'])->name('reservations.index');
 
-    Route::post('/reserva', [ReservesController::class, 'store'])->name('reservations.store');
 
 });
 

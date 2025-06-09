@@ -29,7 +29,7 @@ class Reservation extends Model
 
     public function affiliateLink()
     {
-        return $this->belongsTo(AffiliateLink::class);
+        return $this->belongsTo(Link::class);
     }
 
     public function affiliateUser()
