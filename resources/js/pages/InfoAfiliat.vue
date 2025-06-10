@@ -131,24 +131,30 @@ const breadcrumbs: BreadcrumbItem[] = [
                     <p class="text-xl font-semibold text-gray-900 dark:text-white">{{ page.props.stats.nivel }}</p>
                 </div>
                 <div class="p-4 rounded-xl shadow bg-white dark:bg-gray-800">
-                    <h3 class="text-sm text-gray-500 dark:text-gray-300">% Comisión</h3>
+                    <h3 class="text-sm text-gray-500 dark:text-gray-300">% Comissió</h3>
                     <p class="text-xl font-semibold text-gray-900 dark:text-white">{{ page.props.stats.porcentaje }}%
                     </p>
                 </div>
                 <div class="p-4 rounded-xl shadow bg-white dark:bg-gray-800">
-                    <h3 class="text-sm text-gray-500 dark:text-gray-300">Total comisiones</h3>
+                    <h3 class="text-sm text-gray-500 dark:text-gray-300">Total comissions</h3>
                     <p class="text-xl font-semibold text-green-600 dark:text-green-400">€{{
                         page.props.stats.total_comisiones }}</p>
                 </div>
+
                 <div class="p-4 rounded-xl shadow bg-white dark:bg-gray-800">
-                    <h3 class="text-sm text-gray-500 dark:text-gray-300">Reservas confirmadas</h3>
+                    <h3 class="text-sm text-gray-500 dark:text-gray-300">Reserves confirmades</h3>
                     <p class="text-xl font-semibold text-blue-600 dark:text-blue-400">{{ page.props.stats.reservas }}
                     </p>
                 </div>
                 <div class="p-4 rounded-xl shadow bg-white dark:bg-gray-800">
-                    <h3 class="text-sm text-gray-500 dark:text-gray-300">Clicks recibidos</h3>
+                    <h3 class="text-sm text-gray-500 dark:text-gray-300">Clicks totals rebuts</h3>
                     <p class="text-xl font-semibold text-indigo-600 dark:text-indigo-400">{{ page.props.stats.clicks }}
                     </p>
+                </div>
+                <div class="p-4 rounded-xl shadow bg-white dark:bg-gray-800">
+                    <h3 class="text-sm text-gray-500 dark:text-gray-300">Comissions pendents a cobrar</h3>
+                    <p class="text-xl font-semibold text-green-600 dark:text-green-400">€{{
+                        page.props.stats.comissions_pendents }}</p>
                 </div>
             </div>
 
@@ -166,15 +172,15 @@ const breadcrumbs: BreadcrumbItem[] = [
                     <h2 class="text-lg font-semibold mb-3">Links con más reservas</h2>
                     <ul class="space-y-2">
                         <li v-for="(link, index) in linksTop" :key="index"
-                            class="flex items-center text-sm bg-grey-100 dark:bg-gray-800 p-3 rounded-lg space-x-3">
+                            class="flex items-center text-sm bg-grey-200 dark:bg-gray-800 p-3 rounded-xl shadow space-x-3">
                             <span class="font-bold w-5 text-center">{{ index + 1 }}</span>
                             <div class="flex-1">
                                 <a :href="link.generated_url" target="_blank"
                                     class="text-blue-800 dark:text-blue-200 underline truncate block">
-                                    {{ link.generated_url }}
+                                    {{ link.name ?? link.generated_url }}
                                 </a>
                                 <span class="text-gray-500 dark:text-gray-300 text-xs">Reservas: {{ link.total_reservas
-                                    }}</span>
+                                }}</span>
                             </div>
                         </li>
                     </ul>

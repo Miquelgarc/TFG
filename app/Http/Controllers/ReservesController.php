@@ -29,7 +29,11 @@ class ReservesController extends Controller
             'check_out_date.date' => 'La data de sortida ha de ser una data vàlida.',
             'check_out_date.after' => 'La data de sortida ha de ser posterior a la data d\'entrada.',
         ]);
-
+        if (Auth::id() === null) {
+            $userID = 12; // ID de l'usuari per defecte
+        } else {
+            $userID = Auth::id();
+        }
 
         $house = Property::findOrFail($request->property_id);
 
@@ -45,11 +49,12 @@ class ReservesController extends Controller
             if ($affiliateLink && $affiliateLink->affiliate && $affiliateLink->affiliate->currentAffiliateContract) {
                 $percentage = $affiliateLink->affiliate->currentAffiliateContract->level->commission_percentage ?? 0;
                 $commissionAmount = round(($total * $percentage) / 100, 2);
+                $affiliateLink->increment('conversions');
             }
         }
 
         $reservation = Reservation::create([
-            'user_id' => Auth::id() ?? 12,
+            'user_id' => $userID,
             'property_id' => $house->id,
             'affiliate_link_id' => $affiliateLink->id ?? null,
             'check_in_date' => $request->check_in_date,
@@ -63,16 +68,13 @@ class ReservesController extends Controller
                 'affiliate_id' => $affiliateLink->affiliate_id,
                 'reservation_id' => $reservation->id,
                 'amount' => $commissionAmount,
-                'description' => 'Comisión por reserva de propiedad #' . $house->id,
+                'description' => 'Comisió per reserva al ' . $house->title,
                 'generated_at' => now(),
                 'status' => 'pending',
                 'is_paid' => false,
             ]);
         }
-        return redirect()->route('reservations.index', [
-            'message' => 'Reservation created successfully',
-            'reservation' => $reservation,
-        ]);
+        return redirect()->back()->with('success', 'Reserva creada correctamente.');
     }
     public function Reserva()
     {

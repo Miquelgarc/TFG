@@ -167,10 +167,12 @@ function exportData(format: 'csv' | 'xlsx') {
                             </th>
                             <th @click="sortBy('total_earned')"
                                 class="px-6 py-3 text-left text-sm font-medium uppercase cursor-pointer hover:underline">
-                                Ingresos</th>
-                            <span v-if="filters.order_by === 'total_earned'">
-                                {{ filters.order_dir === 'asc' ? '↑' : '↓' }}
-                            </span>
+                                Ingresos
+                                <span v-if="filters.order_by === 'total_earned'">
+                                    {{ filters.order_dir === 'asc' ? '↑' : '↓' }}
+                                </span>
+                            </th>
+
                             <th @click="sortBy('created_at')"
                                 class="px-6 py-3 text-left text-sm font-medium uppercase cursor-pointer hover:underline">
                                 Data Creació
@@ -194,7 +196,10 @@ function exportData(format: 'csv' | 'xlsx') {
                                     {{ link.property_title ?? '—' }}
                                 </td>
                                 <td class="px-6 py-4 text-blue-600 dark:text-blue-400 break-all">
-                                    {{ link.generated_url }}
+                                    <a :href="link.generated_url">
+                                        {{ link.generated_url }}
+                                    </a>
+
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
                                     {{ link.clicks }}
