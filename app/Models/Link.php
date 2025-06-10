@@ -8,6 +8,7 @@ class Link extends Model
 {
     protected $table = 'affiliate_links';
     protected $fillable = [
+        'name',
         'affiliate_id',
         'property_id',
         'target_url',

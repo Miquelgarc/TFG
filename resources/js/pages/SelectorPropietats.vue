@@ -106,10 +106,11 @@ const createLink = () => {
             <label class="block mb-4">
               <span class="text-gray-700 dark:text-white">Nom del Link</span>
               <input
+                id="name"
                 v-model="form.name"
                 type="text"
                 class="mt-1 block w-full border rounded px-3 py-2 dark:bg-gray-700 dark:text-white"
-                placeholder="Ej: Verano 2025"
+                placeholder="Ex: Estiu 2025"
               />
             </label>
 

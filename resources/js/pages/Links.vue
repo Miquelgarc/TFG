@@ -148,6 +148,7 @@ function exportData(format: 'csv' | 'xlsx') {
                                 class="px-6 py-3 text-left text-sm font-medium uppercase cursor-pointer hover:underline">
                                 Nom Afiliat
                             </th>
+                            <th class="px-6 py-3 text-left text-sm font-medium uppercase">Nom link</th>
                             <th class="px-6 py-3 text-left text-sm font-medium uppercase">Propietat</th>
                             <th class="px-6 py-3 text-left text-sm font-medium uppercase">URL generada</th>
                             <th @click="sortBy('clicks')"
@@ -185,6 +186,9 @@ function exportData(format: 'csv' | 'xlsx') {
                                 class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
                                 <td v-if="isAdmin" class="px-6 py-4 text-gray-900 dark:text-gray-100">
                                     {{ link.affiliate_name }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
+                                    {{ link.name ?? '—' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
                                     {{ link.property_title ?? '—' }}

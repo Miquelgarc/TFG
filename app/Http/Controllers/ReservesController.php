@@ -49,9 +49,9 @@ class ReservesController extends Controller
         }
 
         $reservation = Reservation::create([
-            'user_id' => Auth::id(),
+            'user_id' => Auth::id() ?? 12,
             'property_id' => $house->id,
-            'affiliate_link_id' => $link->id ?? null,
+            'affiliate_link_id' => $affiliateLink->id ?? null,
             'check_in_date' => $request->check_in_date,
             'check_out_date' => $request->check_out_date,
             'total_price' => $total,

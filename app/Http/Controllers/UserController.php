@@ -207,6 +207,11 @@ class UserController extends Controller
 
         if ($request->search) {
             $query->where('affiliate_links.generated_url', 'like', "%{$request->search}%");
+            $query->orWhere('affiliate_links.name', 'like', "%{$request->search}%");
+            $query->orWhere('property.title', 'like', "%{$request->search}%");
+            if ($user->role_name === 'admin') {
+                $query->orWhere('users.name', 'like', "%{$request->search}%");
+            }
         }
 
         if ($request->date_from) {
@@ -233,6 +238,7 @@ class UserController extends Controller
         return Inertia::render('Links', [
             'links' => $links->through(fn($link) => [
                 'id' => $link->id,
+                'name' => $link->name,
                 'property_title' => $link->property_title,
                 'generated_url' => $link->generated_url,
                 'clicks' => $link->clicks,
@@ -409,13 +415,13 @@ class UserController extends Controller
             abort(403, 'No tienes permiso para realizar esta acción.');
         }
 
-        $validated = $request->validate([
+        $request->validate([
             'property_id' => 'required|exists:rental_properties,id',
             'name' => 'nullable|string|max:100',
         ]);
 
         // Obtener la propiedad para generar la URL base
-        $property = Property::findOrFail($validated['property_id']);
+        $property = Property::findOrFail($request->property_id);
 
         // Crear un token único o hash para el link
         $token = Str::random(10);
@@ -429,7 +435,7 @@ class UserController extends Controller
             'generated_url' => $generatedUrl,
             'clicks' => 0,
             'conversions' => 0,
-            'name' => $validated['name'] ?? null,
+            'name' => $request->name ?? null,
         ]);
 
         return redirect()->route('links')->with('success', 'Enlace de afiliado creado correctamente.');

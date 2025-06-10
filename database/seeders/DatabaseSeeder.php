@@ -20,7 +20,8 @@ class DatabaseSeeder extends Seeder
             AffiliateLinksTableSeeder::class,
             ReservasTableSeeder::class,
             CommissionsTableSeeder::class,
-
+            AffiliateLevelSeeder::class,
+            AffiliateContractSeeder::class,
         ]);
     }
 

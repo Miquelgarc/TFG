@@ -145,6 +145,18 @@ class UsersTableSeeder extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
             ],
+            [
+            'name' => 'Anonymous User',
+            'email' => 'anonymous@example.com',
+            'password' => Hash::make('password'),
+            'company_name' => '',
+            'website_url' => '',
+            'status' => 'active',
+            'role_id' => $affiliateRoleId,
+            'remember_token' => \Str::random(10),
+            'created_at' => now(),
+            'updated_at' => now(),
+            ],
         
         ]);
     }
