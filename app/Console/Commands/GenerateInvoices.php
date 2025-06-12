@@ -13,11 +13,12 @@ class GenerateInvoices extends Command
 
     public function handle()
     {
-        $facturaClient = new FacturaDirectaClient();
+        $facturaClient = new FacturaDirectaClient(config('services.facturadirecta.token'));
+
 
         $commissions = Commission::where('status', 'approved')
             ->whereNull('invoice_id')
-            ->whereHas('reservation', fn ($q) => $q->where('check_out_date', '<=', now()))
+/*             ->whereHas('reservation', fn ($q) => $q->where('check_out_date', '<=', now())) */
             ->with('affiliate')
             ->get()
             ->groupBy('affiliate_id');

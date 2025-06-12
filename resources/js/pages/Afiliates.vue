@@ -147,10 +147,10 @@ function changePage(pageNum: number) {
                     <option value="pending">Pendent</option>
                     <option value="rejected">Inactiu</option>
                 </select>
-                <button @click="router.visit(route('invoices.generate'), { method: 'post' })"
+                <!-- <button @click="router.visit(route('invoices.generate'), { method: 'post' })"
                     class="btn bg-chart-2 px-4 py-2 text-white hover:bg-blue-700 rounded-md">
                     Generar Facturas
-                </button>
+                </button> -->
 
             </div>
 

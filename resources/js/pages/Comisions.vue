@@ -278,59 +278,26 @@ const statusColor = (status: string) => {
                 </select>
             </div>
 
-            <div class="md:hidden relative space-y-4 min-h-[200px]">
-                <div v-if="loading"
-                    class="absolute inset-0 bg-white/70 dark:bg-[#0A0A0A]/70 z-10 flex items-center justify-center rounded-lg">
-                    <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none"
-                        viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
-                        </circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                    </svg>
+            <div class="md:hidden space-y-4 overflow-y-auto max-h-[70vh]">
+                <div v-for="c in filteredComisions" :key="c.id" class="p-4 border rounded-lg bg-white dark:bg-gray-800">
+                    <div v-if="isAdmin" class="font-medium">{{ c.affiliate_name }}</div>
+                    <div class="text-sm text-gray-500">Descripció</div>
+                    <div>{{ c.description }}</div>
+                    <div class="text-sm text-gray-500">Estat</div>
+                    <div :class="statusColor(c.status)">{{ c.status }}</div>
+                    <div class="text-sm text-gray-500">Pagat</div>
+                    <div>{{ c.paid_at ? new Date(c.paid_at).toLocaleDateString() : '—' }}</div>
+                    <div class="text-sm text-gray-500">Link</div>
+                    <a v-if="c.affiliate_link_url" :href="c.affiliate_link_url" target="_blank"
+                        class="text-blue-600 dark:text-blue-300 underline truncate">{{ c.affiliate_link_name ??
+                        c.affiliate_link_url
+                        }}</a>
+                    <span v-else>—</span>
+                    <div class="text-sm text-gray-500">Quantitat</div>
+                    <div class="font-bold text-chart-2">€{{ Number(c.amount).toFixed(2) }}</div>
+                    <div class="text-sm text-gray-500">Data</div>
+                    <div>{{ new Date(c.generated_at).toLocaleDateString() }}</div>
                 </div>
-
-                <template v-if="filteredComisions.length">
-                    <div v-for="c in filteredComisions" :key="c.id"
-                        class="p-4 rounded-lg bg-white dark:bg-gray-800 shadow flex flex-col gap-2 border border-gray-200 dark:border-gray-700">
-                        <div v-if="isAdmin" class="text-sm text-gray-500 dark:text-gray-400">Nom Afiliat</div>
-                        <div v-if="isAdmin" class="font-medium text-gray-900 dark:text-gray-100">{{ c.affiliate_name }}
-                        </div>
-
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Descripció</div>
-                        <div class="font-medium text-gray-900 dark:text-gray-100">{{ c.description }}</div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Estat</div>
-                        <div class="font-medium" :class="statusColor(c.status)">{{ c.status }}</div>
-
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Pagat</div>
-                        <div class="text-gray-700 dark:text-gray-300">
-                            {{ c.paid_at ? new Date(c.paid_at).toLocaleDateString() : '—' }}
-                        </div>
-
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Reserva</div>
-                        <div class="text-gray-700 dark:text-gray-300">
-                            #{{ c.reservation_id ?? '—' }}
-                        </div>
-
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Link</div>
-                        <a v-if="c.affiliate_link_url" :href="c.affiliate_link_url" target="_blank"
-                            class="text-blue-600 dark:text-blue-300 underline truncate">
-                            {{ c.affiliate_link_url }}
-                        </a>
-                        <span v-else>—</span>
-
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Quantitat</div>
-                        <div class="font-bold text-chart-2">€{{ Number(c.amount).toFixed(2) }}</div>
-
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Data</div>
-                        <div class="text-gray-700 dark:text-gray-300">{{ new Date(c.generated_at).toLocaleDateString()
-                            }}</div>
-                    </div>
-                </template>
-                <template v-else>
-                    <div class="text-center text-gray-500 dark:text-gray-400 py-6">
-                        No hay comisiones para mostrar.
-                    </div>
-                </template>
             </div>
             <div class="flex gap-2 mt-4">
                 <button @click="exportData('csv')"

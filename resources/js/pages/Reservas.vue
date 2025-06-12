@@ -2,7 +2,7 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { ref, reactive, watch } from 'vue';
-import type { MyPageProps } from '@/types';
+import type { MyPageProps, BreadcrumbItem } from '@/types';
 import { deepClone } from '@/utils/utils';
 
 const page = usePage<MyPageProps>();
@@ -44,12 +44,18 @@ watch(() => page.props.reservas, (newData) => {
     filteredReservations.value = deepClone(newData?.data ?? []);
     filters.page = newData?.current_page ?? 1;
 });
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Reserves',
+        href: '/reserves',
+    },
+];
 </script>
 
 <template>
-    <AppLayout title="Reservas">
+    <AppLayout :breadcrumbs="breadcrumbs">
 
-        <Head title="Reservas" />
+        <Head title="Reserves" />
 
         <div class="p-4 sm:p-6 bg-white dark:bg-[#0A0A0A] transition-colors duration-300">
             <div class="mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
@@ -64,10 +70,10 @@ watch(() => page.props.reservas, (newData) => {
 
                 <select v-model="filters.status" @change="updateReservations"
                     class="input px-4 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-                    <option value="">Todos los estados</option>
-                    <option value="pending">Pendiente</option>
-                    <option value="confirmed">Confirmada</option>
-                    <option value="cancelled">Cancelada</option>
+                    <option value="">Totss els estats</option>
+                    <option value="charged">Pendents</option>
+                    <option value="confirmed">Condirmades</option>
+                    <option value="cancelled">Cancel·lades</option>
                 </select>
 
                 <button @click="resetFilters"
@@ -76,21 +82,18 @@ watch(() => page.props.reservas, (newData) => {
                 </button>
             </div>
 
-            <div class="overflow-x-auto rounded-lg shadow-lg transition-shadow duration-300">
+            <!-- Tabla para escritorio -->
+            <div class="hidden md:block overflow-x-auto rounded-lg shadow-lg transition-shadow duration-300">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 shadow-sm">
                     <thead class="bg-chart-3 text-white dark:bg-chart-1">
                         <tr>
-                            <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Propiedad</th>
+                            <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Propietat</th>
                             <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Entrada</th>
-                            <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Salida</th>
-                            <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Precio Total
-                            </th>
-                            <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Estado</th>
-                            <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Link afiliado
-                            </th>
-                            <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Comisión
-                                generada</th>
-
+                            <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Sortida</th>
+                            <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Preu Total</th>
+                            <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Estat</th>
+                            <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Link afiliat</th>
+                            <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Comissió generada</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -106,8 +109,7 @@ watch(() => page.props.reservas, (newData) => {
                                 <td class="px-6 py-4 text-gray-600 dark:text-gray-300">
                                     {{ new Date(r.check_out_date).toLocaleDateString() }}
                                 </td>
-                                <td class="px-6 py-4 text-chart-2 font-bold">€{{ Number(r.total_price).toFixed(2) }}
-                                </td>
+                                <td class="px-6 py-4 text-chart-2 font-bold">€{{ Number(r.total_price).toFixed(2) }}</td>
                                 <td class="px-6 py-4">
                                     <span :class="{
                                         'text-yellow-600': r.status === 'pending',
@@ -123,33 +125,66 @@ watch(() => page.props.reservas, (newData) => {
                                     </span>
                                     <span v-else class="italic text-gray-500">Reserva directa</span>
                                 </td>
-
                                 <td class="px-6 py-4 text-gray-900 dark:text-gray-100">
                                     <span v-if="r.commissions?.length">
-                                        €{{r.commissions.reduce((total, c) => total + parseFloat(c.amount),
-                                            0).toFixed(2)}}
+                                        €{{ r.commissions.reduce((total, c) => total + parseFloat(c.amount), 0).toFixed(2) }}
                                     </span>
                                     <span v-else class="italic text-gray-500">—</span>
                                 </td>
-
                             </tr>
                         </template>
                         <template v-else>
                             <tr>
-                                <td colspan="6" class="text-center py-6 text-gray-500 dark:text-gray-400">
-                                    No hay reservas para mostrar.
+                                <td colspan="7" class="text-center py-6 text-gray-500 dark:text-gray-400">
+                                    No hi ha reserves per mostrar.
                                 </td>
                             </tr>
                         </template>
                     </tbody>
                 </table>
-
             </div>
+
+            <!-- Vista móvil -->
+            <div class="md:hidden space-y-4">
+                <div v-if="filteredReservations.length" v-for="r in filteredReservations" :key="r.id"
+                    class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow">
+                    <div><strong>Propietat:</strong> {{ r.property?.title ?? 'N/A' }}</div>
+                    <div><strong>Entrada:</strong> {{ new Date(r.check_in_date).toLocaleDateString() }}</div>
+                    <div><strong>Sortida:</strong> {{ new Date(r.check_out_date).toLocaleDateString() }}</div>
+                    <div><strong>Preu Total:</strong> €{{ Number(r.total_price).toFixed(2) }}</div>
+                    <div><strong>Estat:</strong>
+                        <span :class="{
+                            'text-yellow-600': r.status === 'pending',
+                            'text-green-600': r.status === 'confirmed',
+                            'text-red-600': r.status === 'cancelled',
+                        }">
+                            {{ r.status }}
+                        </span>
+                    </div>
+                    <div><strong>Link afiliat:</strong>
+                        <span v-if="r.affiliate_link">
+                            {{ r.affiliate_link.name || r.affiliate_link.generated_url }}
+                        </span>
+                        <span v-else class="italic text-gray-500">Reserva directa</span>
+                    </div>
+                    <div><strong>Comissió generada:</strong>
+                        <span v-if="r.commissions?.length">
+                            €{{ r.commissions.reduce((total, c) => total + parseFloat(c.amount), 0).toFixed(2) }}
+                        </span>
+                        <span v-else class="italic text-gray-500">—</span>
+                    </div>
+                </div>
+                <div v-else class="text-center py-6 text-gray-500 dark:text-gray-400">
+                    No hi ha reserves per mostrar.
+                </div>
+            </div>
+
             <div class="mt-6 flex justify-center gap-2">
-                <button v-for="pageNum in reservations?.last_page" :key="pageNum" @click="changePage(pageNum)" :class="[
-                    'px-4 py-2 rounded-md',
-                    filters.page === pageNum ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-white'
-                ]">
+                <button v-for="pageNum in reservations?.last_page" :key="pageNum" @click="changePage(pageNum)"
+                    :class="[
+                        'px-4 py-2 rounded-md',
+                        filters.page === pageNum ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-white'
+                    ]">
                     {{ pageNum }}
                 </button>
             </div>

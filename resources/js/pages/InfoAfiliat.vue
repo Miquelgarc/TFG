@@ -161,7 +161,7 @@ const breadcrumbs: BreadcrumbItem[] = [
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                 <div class="bg-white dark:bg-transparent rounded-xl shadow p-4">
-                    <h2 class="text-lg font-semibold mb-3">Resumen de comisiones</h2>
+                    <h2 class="text-lg font-semibold mb-3">Resum de comissions</h2>
                     <p class="mb-2 font-medium">Total: €{{ totalSemanal }}</p>
                     <div class="h-56">
                         <Bar :data="chartDataSemanal" :options="chartOptions" />
@@ -169,7 +169,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                 </div>
 
                 <div class="bg-white dark:bg-transparent rounded-xl shadow p-4">
-                    <h2 class="text-lg font-semibold mb-3">Links con más reservas</h2>
+                    <h2 class="text-lg font-semibold mb-3">Links amb más reservas</h2>
 
                     <ul class="space-y-2">
                         <li v-for="(link, index) in linksTop" :key="index"
@@ -180,7 +180,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                                     class="text-blue-800 dark:text-blue-200 underline truncate block">
                                     {{ link.name ?? link.generated_url }}
                                 </a>
-                                <span class="text-gray-500 dark:text-gray-300 text-xs">Reservas: {{ link.total_reservas
+                                <span class="text-gray-500 dark:text-gray-300 text-xs">Reserves: {{ link.total_reservas
                                 }}</span>
                             </div>
                         </li>

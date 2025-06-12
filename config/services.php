@@ -35,7 +35,6 @@ return [
         ],
     ],
     'facturadirecta' => [
-        'account' => env('FACTURA_DIRECTA_ACCOUNT'),
         'token' => env('FACTURA_DIRECTA_TOKEN'),
     ],
 

@@ -2,7 +2,7 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { ref, reactive, watch } from 'vue';
-import type { MyPageProps } from '@/types';
+import type { MyPageProps, BreadcrumbItem } from '@/types';
 import { deepClone } from '@/utils/utils.js';
 import dayjs from 'dayjs';
 
@@ -106,11 +106,18 @@ function exportData(format: 'csv' | 'xlsx') {
     window.open(route('links.export') + '?' + query, '_blank');
 }
 
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Links',
+        href: '/afiliats/links',
+    },
+];
+
 </script>
 
 
 <template>
-    <AppLayout title="Links">
+    <AppLayout :breadcrumbs="breadcrumbs">
 
         <Head title="Links" />
 
@@ -129,7 +136,7 @@ function exportData(format: 'csv' | 'xlsx') {
                 <!-- Filtro por afiliado (solo admin) -->
                 <select v-if="isAdmin" v-model="filters.affiliate_id" @change="updateLinks"
                     class="input px-4 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-                    <option value="">Todos los afiliados</option>
+                    <option value="">Tots els afiliats</option>
                     <option v-for="user in (page.props.affiliates as Array<{ id: number | string; name: string }>)"
                         :key="user.id" :value="user.id">
                         {{ user.name }}
@@ -138,7 +145,7 @@ function exportData(format: 'csv' | 'xlsx') {
 
                 <button @click="router.visit(route('links.create'))"
                     class="bg-chart-2 hover:bg-blue-700 dark:bg-chart-1 text-white px-3 py-2 rounded-lg font-medium">
-                    Generar nuevo link
+                    Generar nou link
                 </button>
                 <button @click="resetFilters"
                     class="btn bg-chart-1 hover:bg-red-600 text-white px-4 py-2 rounded-md transition">
@@ -146,7 +153,7 @@ function exportData(format: 'csv' | 'xlsx') {
                 </button>
             </div>
 
-            <div class="overflow-x-auto rounded-lg shadow-lg relative">
+            <div class="hidden md:block overflow-x-auto rounded-lg shadow-lg relative">
                 <div v-if="loading"
                     class="absolute inset-0 bg-white/70 dark:bg-[#0A0A0A]/70 flex items-center justify-center z-10">
                     <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -175,7 +182,7 @@ function exportData(format: 'csv' | 'xlsx') {
                             </th>
                             <th @click="sortBy('conversions')"
                                 class="px-6 py-3 text-left text-sm font-medium uppercase cursor-pointer hover:underline">
-                                Conversiones
+                                Conversions
                                 <span v-if="filters.order_by === 'conversions'">
                                     {{ filters.order_dir === 'asc' ? '↑' : '↓' }}
                                 </span>
@@ -233,7 +240,7 @@ function exportData(format: 'csv' | 'xlsx') {
                                 <td class="px-6 py-4">
                                     <button class="text-blue-600 dark:text-blue-400 hover:underline text-sm"
                                         @click="generateQR(link)">
-                                        Ver QR
+                                        Veure QR
                                     </button>
                                 </td>
                                 <!-- Modal de QR -->
@@ -273,6 +280,31 @@ function exportData(format: 'csv' | 'xlsx') {
                         </template>
                     </transition-group>
                 </table>
+            </div>
+            <!-- Vista móvil simplificada -->
+            <div class="md:hidden space-y-4">
+                <div v-for="link in filteredLinks" :key="link.id"
+                    class="border rounded-lg p-4 bg-white dark:bg-gray-800">
+                    <div v-if="isAdmin" class="font-semibold text-gray-700 dark:text-gray-200">{{ link.affiliate_name }}
+                    </div>
+                    <div><span class="font-semibold">Nom:</span> {{ link.name ?? '—' }}</div>
+                    <div><span class="font-semibold">Propietat:</span> {{ link.property_title ?? '—' }}</div>
+                    <div><span class="font-semibold">URL:</span>
+                        <a :href="link.generated_url"
+                            class="text-blue-600 dark:text-blue-300 underline break-all block">{{
+                            link.generated_url }}</a>
+                    </div>
+                    <div><span class="font-semibold">Clicks:</span> {{ link.clicks }}</div>
+                    <div><span class="font-semibold">Conversions:</span> {{ link.conversions }}</div>
+                    <div><span class="font-semibold">Ingresos:</span> {{ link.total_earned }} €</div>
+                    <div><span class="font-semibold">Data:</span> {{ dayjs(link.created_at).format('DD/MM/YYYY') }}
+                    </div>
+                    <div>
+                        <button class="text-blue-600 dark:text-blue-400 underline text-sm"
+                            @click="generateQR(link)">Veure
+                            QR</button>
+                    </div>
+                </div>
             </div>
             <div class="flex gap-2 mt-4">
                 <button @click="exportData('csv')"

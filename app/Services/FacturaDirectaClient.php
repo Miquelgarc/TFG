@@ -6,37 +6,32 @@ use Illuminate\Support\Facades\Http;
 
 class FacturaDirectaClient
 {
-    protected string $apiToken;
-    protected string $subdomain;
-    protected string $baseUrl;
+    private string $baseUrl = 'https://fdi.api.facturadirecta.com/v1/';
+    private string $apiToken;
 
-    public function __construct()
+    public function __construct(string $apiToken = null)
     {
-        $this->apiToken = config('services.facturadirecta.token');
-        $this->subdomain = config('services.facturadirecta.subdomain');
-        $this->baseUrl = "https://{$this->subdomain}.facturadirecta.com/api/v1";
+        $this->apiToken = $apiToken ?? config('services.facturadirecta.token');
     }
 
-    protected function request(string $method, string $endpoint, array $data = [])
+    private function request(string $method, string $endpoint, array $data = [])
     {
         $response = Http::withToken($this->apiToken)
-            ->acceptJson()
-            ->$method("{$this->baseUrl}/{$endpoint}", $data);
+            ->accept('application/json')
+            ->baseUrl($this->baseUrl)
+            ->{$method}($endpoint, $data);
 
-        if (!$response->successful()) {
-            throw new \Exception('FacturaDirecta error: ' . $response->body());
-        }
-
-        return $response->json();
+        $response->throw(); // Lanza excepción si hay error
+        return $response->json(); // Devuelve array asociativo
     }
 
     public function createClient(array $data)
     {
-        return $this->request('post', 'clients', ['client' => $data]);
+        return $this->request('post', 'clients', $data);
     }
 
     public function createInvoice(array $data)
     {
-        return $this->request('post', 'invoices', ['invoice' => $data]);
+        return $this->request('post', 'invoices', $data);
     }
 }
