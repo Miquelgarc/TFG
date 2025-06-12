@@ -10,7 +10,7 @@ const comisions = page.props.comisions;
 const filteredComisions = ref(deepClone(comisions?.data ?? []));
 const isAdmin = page.props.auth.user?.role_name === 'admin';
 const loading = ref(false);
-
+console.log('Comisions page props:', comisions);
 const filters = reactive({
     search: page.props.filtersCommission?.search ?? '',
     date_from: page.props.filtersCommission?.date_from ?? '',
@@ -62,6 +62,7 @@ function resetFilters() {
     filters.order_by = '';
     filters.order_dir = '';
     filters.page = 1;
+    filters.status = '';
     updateComisions();
 }
 
@@ -83,6 +84,12 @@ function exportData(format: 'csv' | 'xlsx') {
     const query = new URLSearchParams(params as any).toString();
     window.open(route('comisions.export') + '?' + query, '_blank');
 }
+
+function openInvoice(id: number) {
+    const url = route('comisions.invoice', id);
+    window.open(url, '_blank');
+}
+
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Comissions',
@@ -175,6 +182,13 @@ const statusColor = (status: string) => {
                                         {{ filters.order_dir === 'asc' ? '↑' : '↓' }}
                                     </span>
                                 </th>
+
+                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Estat</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Pagat el
+                                </th>
+                                <!--  <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Reserva
+                                </th> -->
+                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Link</th>
                                 <th @click="sortBy('generated_at')"
                                     class="px-6 py-3 text-left text-sm font-medium uppercase cursor-pointer hover:underline tracking-wider">
                                     Data
@@ -182,19 +196,13 @@ const statusColor = (status: string) => {
                                         {{ filters.order_dir === 'asc' ? '↑' : '↓' }}
                                     </span>
                                 </th>
-                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Estat</th>
-                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Pagat el
-                                </th>
-                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Reserva
-                                </th>
-                                <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Link</th>
-
                             </tr>
                         </thead>
                         <transition-group name="fade" tag="tbody">
                             <template v-if="filteredComisions.length">
-                                <tr v-for="c in filteredComisions" :key="c.id"
-                                    class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                                <tr v-for="c in filteredComisions" :key="c.id" @dblclick="() => openInvoice(c.id)"
+                                    class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 cursor-pointer">
+
                                     <td v-if="isAdmin"
                                         class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
                                         {{ c.affiliate_name }}
@@ -206,9 +214,7 @@ const statusColor = (status: string) => {
                                     <td class="px-6 py-4 text-chart-2 dark:text-chart-2 dark:font-bold">
                                         €{{ Number(c.amount).toFixed(2) }}
                                     </td>
-                                    <td class="px-6 py-4 text-gray-600 dark:text-gray-300">
-                                        {{ new Date(c.generated_at).toLocaleDateString() }}
-                                    </td>
+
                                     <td class="px-6 py-4 text-gray-700 dark:text-gray-300">
                                         <span :class="{
                                             'text-yellow-500': c.status === 'pending',
@@ -216,24 +222,28 @@ const statusColor = (status: string) => {
                                             'text-green-600': c.status === 'paid'
                                         }">{{ c.status }}</span>
                                     </td>
-
                                     <td class="px-6 py-4 text-gray-500 dark:text-gray-400">
                                         {{ c.paid_at ? new Date(c.paid_at).toLocaleDateString() : '—' }}
                                     </td>
 
-                                    <td class="px-6 py-4">
+
+                                    <!-- <td class="px-6 py-4">
                                         <span v-if="c.reservation_id" class="text-sm text-blue-700 dark:text-blue-300">
                                             #{{ c.reservation_id }}
                                         </span>
                                         <span v-else>—</span>
-                                    </td>
+                                    </td> -->
 
                                     <td class="px-6 py-4">
                                         <a v-if="c.affiliate_link_url" :href="c.affiliate_link_url" target="_blank"
-                                            class="text-blue-600 dark:text-blue-300 underline truncate block max-w-[180px]">
-                                            {{ c.affiliate_link_url }}
+                                            class="dark:text-blue-300 hover:text-blue-400 truncate block max-w-[180px]">
+                                            {{ c.affiliate_link_name ?? c.affiliate_link_url }}
                                         </a>
                                         <span v-else>—</span>
+                                    </td>
+
+                                    <td class="px-6 py-4 text-gray-600 dark:text-gray-300">
+                                        {{ new Date(c.generated_at).toLocaleDateString() }}
                                     </td>
 
                                 </tr>
@@ -328,6 +338,7 @@ const statusColor = (status: string) => {
                     Exportar CSV
                 </button>
             </div>
+
 
             <!-- Paginación -->
             <div v-if="(comisions?.last_page ?? 0) > 1" class="mt-6 flex flex-wrap justify-center gap-2">

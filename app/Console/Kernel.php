@@ -15,6 +15,9 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         UpdateAffiliateLevels::class,
+        GenerateWeeklyInvoicesJob::class,
+        \App\Console\Commands\GenerateInvoices::class,
+
     ];
 
     /**
@@ -31,7 +34,7 @@ class Kernel extends ConsoleKernel
      */
     protected function commands(): void
     {
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
 
         require base_path('routes/console.php');
     }

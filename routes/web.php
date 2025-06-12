@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AffiliateLinkController;
 use App\Http\Controllers\HouseController;
 use App\Http\Controllers\PropertyController;
+use App\Http\Controllers\InvoiceController;
 
 use Database\Seeders\UsersTableSeeder;
 use Illuminate\Support\Facades\Route;
@@ -47,6 +48,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/reserva', [ReservesController::class, 'indexProperties'])->name('reservations.index');
 
+    Route::get('/comisions/{commission}/invoice', [UserController::class, 'downloadInvoice'])
+        ->name('comisions.invoice')
+        ->middleware(['auth']);
+
+    Route::get('/facturas/{invoice}', [InvoiceController::class, 'show'])
+        ->name('invoices.show');
+    Route::post('/admin/generar-facturas', function () {
+        Artisan::call('invoices:generate');
+        return back()->with('success', 'Facturas generadas correctamente.');
+    })->name('invoices.generate');
 
 });
 

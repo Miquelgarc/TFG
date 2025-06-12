@@ -90,7 +90,11 @@ class ReservesController extends Controller
         $query = Reservation::query()->with([
             'property',
             'user',
-            'affiliateLink.affiliate' // el afiliado
+            'affiliateLink.affiliate', // el afiliado
+            'property',
+            'user',
+            'affiliateLink.affiliate',
+            'commissions'
         ]);
 
         // FILTRO POR TIPO DE USUARIO
@@ -131,7 +135,7 @@ class ReservesController extends Controller
         }
 
         // PAGINAR
-        $reservations = $query->orderByDesc('created_at')->paginate(10)->appends($request->all());
+        $reservations = $query->orderByDesc('created_at')->paginate(6)->appends($request->all());
 
         return Inertia::render('Reservas', [
             'reservas' => $reservations,

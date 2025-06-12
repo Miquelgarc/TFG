@@ -6,14 +6,27 @@ use Illuminate\Database\Eloquent\Model;
 
 class AffiliateLink extends Model
 {
+    protected $table = 'affiliate_links';
     protected $fillable = [
+        'name',
         'affiliate_id',
+        'property_id',
         'target_url',
         'generated_url',
         'clicks',
         'conversions',
+        'created_at',
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function getLinkAttribute($value)
+    {
+        return url($value);
+    }
 
     public function affiliate()
     {
@@ -23,6 +36,11 @@ class AffiliateLink extends Model
     public function reservations()
     {
         return $this->hasMany(Reservation::class, 'affiliate_link_id');
+    }
+    
+    public function property()
+    {
+        return $this->belongsTo(Property::class, 'property_id');
     }
 
     public function clicks()

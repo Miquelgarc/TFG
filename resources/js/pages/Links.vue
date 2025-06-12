@@ -11,7 +11,22 @@ const page = usePage<MyPageProps>();
 const links = page.props.links;
 const filteredLinks = ref(deepClone(links?.data ?? []));
 const isAdmin = page.props.auth.user?.role_name === 'admin';
+const qrUrl = ref('');
 
+const showQR = ref(false);
+const selectedQRLink = ref<{ name?: string; generated_url: string } | null>(null);
+
+function generateQR(link: { name?: string; generated_url: string }) {
+    selectedQRLink.value = link;
+    qrUrl.value = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(link.generated_url)}&size=200x200`;
+    showQR.value = true;
+}
+
+function closeQR() {
+    showQR.value = false;
+    selectedQRLink.value = null;
+    qrUrl.value = '';
+}
 const loading = ref(false);
 
 /* const filters = reactive({
@@ -122,11 +137,11 @@ function exportData(format: 'csv' | 'xlsx') {
                 </select>
 
                 <button @click="router.visit(route('links.create'))"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">
+                    class="bg-chart-2 hover:bg-blue-700 dark:bg-chart-1 text-white px-3 py-2 rounded-lg font-medium">
                     Generar nuevo link
                 </button>
                 <button @click="resetFilters"
-                    class="btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition">
+                    class="btn bg-chart-1 hover:bg-red-600 text-white px-4 py-2 rounded-md transition">
                     Reset
                 </button>
             </div>
@@ -180,6 +195,8 @@ function exportData(format: 'csv' | 'xlsx') {
                                     {{ filters.order_dir === 'asc' ? '↑' : '↓' }}
                                 </span>
                             </th>
+                            <th class="px-6 py-3 text-left text-sm font-medium uppercase">QR</th>
+
                         </tr>
                     </thead>
                     <transition-group name="fade" tag="tbody">
@@ -213,12 +230,44 @@ function exportData(format: 'csv' | 'xlsx') {
                                 <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
                                     {{ dayjs(link.created_at).format('DD/MM/YYYY') }}
                                 </td>
+                                <td class="px-6 py-4">
+                                    <button class="text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                                        @click="generateQR(link)">
+                                        Ver QR
+                                    </button>
+                                </td>
+                                <!-- Modal de QR -->
+                                <transition name="fade">
+                                    <div v-if="showQR"
+                                        class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+                                        <div
+                                            class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl w-[300px] relative text-center">
+                                            <button class="absolute top-2 right-3 text-gray-500 hover:text-gray-300"
+                                                @click="closeQR">
+                                                &times;
+                                            </button>
+                                            <h2 class="text-lg font-semibold mb-4 dark:text-white">
+                                                QR del link
+                                                <br>
+                                                <span
+                                                    class="text-sm font-normal block mt-1 text-gray-500 dark:text-gray-300">
+                                                    {{ selectedQRLink?.name || 'Link sense nom' }}
+                                                </span>
+                                            </h2>
+                                            <img :src="qrUrl" alt="QR Code" class="mx-auto mb-4 w-40 h-40" />
+                                            <a :href="qrUrl" target="_blank" download
+                                                class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-400 underline">
+                                                Descargar QR
+                                            </a>
+                                        </div>
+                                    </div>
+                                </transition>
                             </tr>
                         </template>
                         <template v-else>
                             <tr>
                                 <td colspan="6" class="text-center py-6 text-gray-500 dark:text-gray-400">
-                                    No hay links para mostrar.
+                                    No hi ha links a mostrar.
                                 </td>
                             </tr>
                         </template>
@@ -227,9 +276,13 @@ function exportData(format: 'csv' | 'xlsx') {
             </div>
             <div class="flex gap-2 mt-4">
                 <button @click="exportData('csv')"
-                    class="btn text-white hover:bg-gray-600 px-4 py-2 rounded-md text-sm transition">
+                    class="btn dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 px-4 py-2 rounded-md text-sm transition">
                     Exportar CSV
                 </button>
+            </div>
+            <div v-if="qrUrl" class="mt-4">
+                <img :src="qrUrl" alt="QR Code" class="w-40 h-40" />
+                <a :href="qrUrl" target="_blank" download>Descargar QR</a>
             </div>
 
             <!-- Paginación -->
@@ -248,5 +301,13 @@ function exportData(format: 'csv' | 'xlsx') {
 </template>
 
 <style scoped>
-/* Puedes agregar transiciones o estilos extra aquí si lo deseas */
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
 </style>

@@ -13,6 +13,7 @@ class Commission extends Model
         'description',
         'generated_at',
         'status',
+        'invoice_id',
         'is_paid',
         'paid_at',
     ];

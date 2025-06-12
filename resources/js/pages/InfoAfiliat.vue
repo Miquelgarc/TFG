@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Head, usePage } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import { computed, ref, onMounted, watch } from 'vue';
 import type { MyPageProps } from '@/types';
 import { Bar } from 'vue-chartjs'
@@ -157,22 +157,23 @@ const breadcrumbs: BreadcrumbItem[] = [
                         page.props.stats.comissions_pendents }}</p>
                 </div>
             </div>
-
+            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                 <div class="bg-white dark:bg-transparent rounded-xl shadow p-4">
                     <h2 class="text-lg font-semibold mb-3">Resumen de comisiones</h2>
                     <p class="mb-2 font-medium">Total: €{{ totalSemanal }}</p>
-                    <div class="h-96">
+                    <div class="h-56">
                         <Bar :data="chartDataSemanal" :options="chartOptions" />
                     </div>
                 </div>
 
                 <div class="bg-white dark:bg-transparent rounded-xl shadow p-4">
                     <h2 class="text-lg font-semibold mb-3">Links con más reservas</h2>
+
                     <ul class="space-y-2">
                         <li v-for="(link, index) in linksTop" :key="index"
-                            class="flex items-center text-sm bg-grey-200 dark:bg-gray-800 p-3 rounded-xl shadow space-x-3">
+                            class="flex items-center text-sm bg-gray-50 dark:bg-gray-800 p-2 mb-3 rounded-xl shadow space-x-3">
                             <span class="font-bold w-5 text-center">{{ index + 1 }}</span>
                             <div class="flex-1">
                                 <a :href="link.generated_url" target="_blank"
@@ -183,6 +184,9 @@ const breadcrumbs: BreadcrumbItem[] = [
                                 }}</span>
                             </div>
                         </li>
+                        <button @click="router.visit(route('links'))" class="text-gray-600 text-sm mb-4">
+                            Veure tots els links..
+                        </button>
                     </ul>
                 </div>
 

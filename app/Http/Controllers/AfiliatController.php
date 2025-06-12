@@ -29,7 +29,7 @@ class AfiliatController extends Controller
                 ->where('al.affiliate_id', $user->id)
                 ->groupBy('al.generated_url', 'al.name')
                 ->orderByDesc('total_reservas')
-                ->limit(5)
+                ->limit(3)
                 ->get();
 
 

@@ -80,22 +80,23 @@ watch(() => page.props.reservas, (newData) => {
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 shadow-sm">
                     <thead class="bg-chart-3 text-white dark:bg-chart-1">
                         <tr>
-                            <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Usuario</th>
                             <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Propiedad</th>
                             <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Entrada</th>
                             <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Salida</th>
                             <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Precio Total
                             </th>
                             <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Estado</th>
+                            <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Link afiliado
+                            </th>
+                            <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Comisión
+                                generada</th>
+
                         </tr>
                     </thead>
                     <tbody>
                         <template v-if="filteredReservations.length">
                             <tr v-for="r in filteredReservations" :key="r.id"
                                 class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
-                                <td class="px-6 py-4 text-gray-900 dark:text-gray-100">
-                                    {{ r.user?.name ?? 'N/A' }}
-                                </td>
                                 <td class="px-6 py-4 text-gray-900 dark:text-gray-100">
                                     {{ r.property?.title ?? 'N/A' }}
                                 </td>
@@ -116,6 +117,21 @@ watch(() => page.props.reservas, (newData) => {
                                         {{ r.status }}
                                     </span>
                                 </td>
+                                <td class="px-6 py-4 text-gray-900 dark:text-gray-100">
+                                    <span v-if="r.affiliate_link">
+                                        {{ r.affiliate_link.name || r.affiliate_link.generated_url }}
+                                    </span>
+                                    <span v-else class="italic text-gray-500">Reserva directa</span>
+                                </td>
+
+                                <td class="px-6 py-4 text-gray-900 dark:text-gray-100">
+                                    <span v-if="r.commissions?.length">
+                                        €{{r.commissions.reduce((total, c) => total + parseFloat(c.amount),
+                                            0).toFixed(2)}}
+                                    </span>
+                                    <span v-else class="italic text-gray-500">—</span>
+                                </td>
+
                             </tr>
                         </template>
                         <template v-else>
@@ -127,17 +143,16 @@ watch(() => page.props.reservas, (newData) => {
                         </template>
                     </tbody>
                 </table>
-                
+
             </div>
             <div class="mt-6 flex justify-center gap-2">
-                    <button v-for="pageNum in reservations?.last_page" :key="pageNum" @click="changePage(pageNum)"
-                        :class="[
-                            'px-4 py-2 rounded-md',
-                            filters.page === pageNum ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-white'
-                        ]">
-                        {{ pageNum }}
-                    </button>
-                </div>
+                <button v-for="pageNum in reservations?.last_page" :key="pageNum" @click="changePage(pageNum)" :class="[
+                    'px-4 py-2 rounded-md',
+                    filters.page === pageNum ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-white'
+                ]">
+                    {{ pageNum }}
+                </button>
+            </div>
         </div>
     </AppLayout>
 </template>

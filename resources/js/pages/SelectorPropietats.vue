@@ -54,7 +54,7 @@ const createLink = () => {
 
     <div class="p-6 max-w-7xl mx-auto">
       <h1 class="text-3xl font-extrabold mb-6 text-gray-800 dark:text-white">
-        Selecciona una propiedtat per generar un link d'afiliat
+        Selecciona una propietat per generar un link d'afiliat
       </h1>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">

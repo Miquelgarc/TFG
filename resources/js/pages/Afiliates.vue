@@ -147,13 +147,17 @@ function changePage(pageNum: number) {
                     <option value="pending">Pendent</option>
                     <option value="rejected">Inactiu</option>
                 </select>
+                <button @click="router.visit(route('invoices.generate'), { method: 'post' })"
+                    class="btn bg-chart-2 px-4 py-2 text-white hover:bg-blue-700 rounded-md">
+                    Generar Facturas
+                </button>
 
             </div>
 
             <div class="overflow-x-auto rounded-lg shadow-lg transition-shadow duration-300">
                 <div class="transition-all duration-300">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-blue-600 text-white dark:bg-blue-700">
+                        <thead class="bg-chart-1 text-white dark:bg-chart-1">
                             <tr>
                                 <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Nom</th>
                                 <th class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Email</th>
@@ -178,7 +182,7 @@ function changePage(pageNum: number) {
                                 <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ afiliat.email }}</td>
                                 <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ afiliat.level_name }}</td>
                                 <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ afiliat.commission_percentage
-                                }}%</td>
+                                    }}%</td>
                                 <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ afiliat.total_reservations }}
                                 </td>
                                 <td class="px-6 py-4 text-gray-900 dark:text-gray-100">€{{ afiliat.total_earned }}</td>

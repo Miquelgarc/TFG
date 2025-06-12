@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 
 class UserController extends Controller
@@ -114,26 +115,27 @@ class UserController extends Controller
                 ->select([
                     'commissions.*',
                     'reservations.id as reservation_id',
+                    'affiliate_links.name as affiliate_link_name',
                     'affiliate_links.generated_url as affiliate_link_url',
                 ]);
         }
         if ($user->role_name === 'admin') {
             $query->join('users', 'commissions.affiliate_id', '=', 'users.id')
-                ->leftJoin('reservations', 'commissions.reservation_id', '=', 'reservations.id')
-                ->leftJoin('affiliate_links', 'reservations.affiliate_link_id', '=', 'affiliate_links.id')
+                ->join('reservations', 'commissions.reservation_id', '=', 'reservations.id')
+                ->join('affiliate_links', 'reservations.affiliate_link_id', '=', 'affiliate_links.id')
                 ->select([
                     'commissions.*',
                     'users.name as affiliate_name',
                     'reservations.id as reservation_id',
+                    'affiliate_links.name as affiliate_link_name',
                     'affiliate_links.generated_url as affiliate_link_url',
                 ]);
         }
 
-
-
         // Filtro por búsqueda en descripción
         if ($request->search) {
             $query->where('description', 'like', "%{$request->search}%", );
+            $query->orwhere("affiliate_links.name", 'like', "%{$request->search}%");
             if ($user->role_name === 'admin') {
                 $query->orWhere('users.name', 'like', "%{$request->search}%");
             }
@@ -156,9 +158,21 @@ class UserController extends Controller
             $query->where('commissions.status', $request->status);
         }
 
-        $comisions = $query->paginate(10)->appends($request->all());
+        $comisions = $query->paginate(7)->appends($request->all());
         return Inertia::render('Comisions', [
-            'comisions' => $comisions,
+            'comisions' => $comisions->through(fn($comision) => [
+                'id' => $comision->id,
+                'description' => $comision->description,
+                'amount' => $comision->amount,
+                'generated_at' => $comision->generated_at,
+                'status' => $comision->status,
+                'is_paid' => $comision->is_paid,
+                'paid_at' => $comision->paid_at,
+                'reservation_id' => $comision->reservation_id,
+                'affiliate_link_url' => $comision->affiliate_link_url,
+                'affiliate_link_name' => $comision->affiliate_link_name,
+                'affiliate_name' => $comision->affiliate_name ?? null,
+            ]),
             'filters' => [
                 'search' => $request->search,
                 'date_from' => $request->date_from,
@@ -231,6 +245,14 @@ class UserController extends Controller
             $query->orderBy($request->order_by, $request->order_dir === 'asc' ? 'asc' : 'desc');
         }
 
+        if ($request->order_by === 'total_earned') {
+            $query->orderByRaw('(
+        SELECT SUM(commissions.amount)
+        FROM commissions
+        JOIN reservations ON commissions.reservation_id = reservations.id
+        WHERE reservations.affiliate_link_id = affiliate_links.id
+    ) ' . ($request->order_dir === 'asc' ? 'ASC' : 'DESC'));
+        }
 
 
         $links = $query->paginate(10)->appends($request->all());
@@ -350,10 +372,44 @@ class UserController extends Controller
         }, 200, $headers);
 
     }
+    public function downloadInvoice(Commission $commission)
+    {
+        $user = auth()->user();
+
+        // Seguridad: solo el afiliado dueño o admin pueden descargar
+        if ($user->role_name !== 'admin' && $user->id !== $commission->affiliate_id) {
+            abort(403);
+        }
+
+        $affiliate = $commission->affiliate ?? $commission->affiliate()->first();
+        $reservation = $commission->reservation;
+
+        $pdf = Pdf::loadView('pdfs.invoice', [
+            'commission' => $commission,
+            'affiliate' => $affiliate,
+            'reservation' => $reservation,
+        ]);
+
+        $filename = 'Factura_Comision_' . $commission->id . '.pdf';
+        return $pdf->download($filename);
+    }
     public function exportLink(Request $request)
     {
+        $user = Auth::user();
+
         $query = Link::query()->with('affiliate');
 
+        // Si el usuario es un afiliado, solo ve sus links
+        if ($user->role_name === 'affiliate') {
+            $query->where('affiliate_id', $user->id);
+        }
+
+        // Si es admin y filtra por afiliado
+        if ($user->role_name === 'admin' && $request->filled('affiliate_id')) {
+            $query->where('affiliate_id', $request->affiliate_id);
+        }
+
+        // Filtros comunes
         if ($request->search) {
             $query->where('generated_url', 'like', "%{$request->search}%");
         }
@@ -366,16 +422,13 @@ class UserController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        if ($request->affiliate_id) {
-            $query->where('affiliate_id', $request->affiliate_id);
-        }
-
         $links = $query->get();
 
         if ($request->export === 'csv') {
             return response()->streamDownload(function () use ($links) {
                 $handle = fopen('php://output', 'w');
                 fputcsv($handle, ['Afiliado', 'URL Padre', 'URL Generada', 'Clicks', 'Conversiones', 'Fecha']);
+
                 foreach ($links as $link) {
                     fputcsv($handle, [
                         $link->affiliate->name ?? '',
@@ -386,6 +439,7 @@ class UserController extends Controller
                         $link->created_at->format('d/m/Y'),
                     ]);
                 }
+
                 fclose($handle);
             }, 'links.csv');
         }
